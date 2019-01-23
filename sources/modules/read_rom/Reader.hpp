@@ -22,8 +22,6 @@ namespace rom
 			std::uint32_t EntryPoint;
 			char NintendLogo[48];
 			char Title[16];
-//			char ManufactureCode[4];
-//			std::uint8_t CGB;
 			std::uint16_t NewLicensee;
 			std::uint8_t SGB;
 			std::uint8_t Cartridge;
