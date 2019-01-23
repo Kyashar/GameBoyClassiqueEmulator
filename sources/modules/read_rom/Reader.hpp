@@ -1,0 +1,52 @@
+/*
+** EPITECH PROJECT, 2019
+** Epitech scolarship project (4 years remaining)
+** File description:
+**      Made on 2019/01 by ebernard
+*/
+
+#ifndef EMULATOR_GAMEBOY_READER_HPP
+#define EMULATOR_GAMEBOY_READER_HPP
+
+#include <vector>
+#include <fstream>
+#include <string>
+#include <ostream>
+
+namespace rom
+{
+	class Reader
+	{
+	public:
+		struct RomInfos {
+			std::uint32_t EntryPoint;
+			char NintendLogo[48];
+			char Title[16];
+//			char ManufactureCode[4];
+//			std::uint8_t CGB;
+			std::uint16_t NewLicensee;
+			std::uint8_t SGB;
+			std::uint8_t Cartridge;
+			std::uint8_t ROMsize;
+			std::uint8_t RAMSize;
+			std::uint8_t Country;
+			std::uint8_t OldLicensee;
+			std::uint8_t Version;
+			std::uint8_t HeaderChecksum;
+			std::uint16_t GlobalChecksum;
+		};
+
+		explicit Reader(std::string fileName);
+		void readHeader();
+
+	private:
+		std::ifstream _file;
+		RomInfos _romInfos;
+		std::vector<unsigned char> _fileContent;
+	};
+}
+
+std::ostream &operator<<(std::ostream &os, const rom::Reader::RomInfos &infos);
+
+
+#endif //EMULATOR_GAMEBOY_READER_HPP
