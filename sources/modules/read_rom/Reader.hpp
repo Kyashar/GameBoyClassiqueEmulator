@@ -36,10 +36,18 @@ namespace rom
 
 		explicit Reader(std::string fileName);
 		void readHeader();
+		size_t getRomSize();
+
+		std::vector<unsigned char> &getNintendoData() {
+			return _nintendoLogo;
+		}
 
 	private:
 		std::ifstream _file;
+		size_t _sizeRom;
+
 		RomInfos _romInfos;
+		std::vector<unsigned char> _nintendoLogo;
 		std::vector<unsigned char> _fileContent;
 	};
 }

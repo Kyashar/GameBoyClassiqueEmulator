@@ -5,9 +5,11 @@
 **      Made on 2019/01 by ebernard
 */
 
+#include <cmath>
 #include <iostream>
 #include "Reader.hpp"
-char const hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+constexpr char hex_chars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
 std::ostream &operator<<(std::ostream &os, const rom::Reader::RomInfos &infos)
 {
@@ -37,10 +39,8 @@ std::ostream &operator<<(std::ostream &os, const rom::Reader::RomInfos &infos)
 	os << "Country:\t" << std::hex << (int)infos.Country << std::endl;
 //	os << std::hex << (int)infos.OldLicensee << std::endl;
 	os << "Version:\t" << std::hex << (int)infos.Version << std::endl;
-	os << std::hex << (int)infos.HeaderChecksum << std::endl;
-	os << std::hex << (int)infos.GlobalChecksum << std::endl;
-
-	os << std::hex << sizeof(infos)<< std::endl;
+//	os << std::hex << (int)infos.HeaderChecksum << std::endl;
+//	os << std::hex << (int)infos.GlobalChecksum << std::endl;
 	return os;
 }
 
@@ -48,14 +48,25 @@ std::ostream &operator<<(std::ostream &os, const rom::Reader::RomInfos &infos)
 rom::Reader::Reader(std::string fileName) :
 	_file(fileName)
 {
+	_nintendoLogo.resize(256);
 }
 
 void rom::Reader::readHeader()
 {
-	char readFirstByte[256];
-	RomInfos infos{0};
+	_file.read(reinterpret_cast<char *>(_nintendoLogo.data()), _nintendoLogo.size());
+	_file.read(reinterpret_cast<char *>(&_romInfos), sizeof(_romInfos));
+	std::cout << _romInfos << std::endl;
 
-	_file.read(readFirstByte, 256);
-	_file.read(reinterpret_cast<char *>(&infos), sizeof(infos));
-	std::cout << infos << std::endl;
+	std::cout << "size " << std::to_string(getRomSize()) << std::endl;
+	_fileContent.resize(getRomSize());
+	_file.read(reinterpret_cast<char *>(_fileContent.data()), _fileContent.size());
+}
+
+size_t rom::Reader::getRomSize()
+{
+	if (_romInfos.EntryPoint == 0)
+		throw std::runtime_error("header is Empty");
+	_sizeRom = 1;
+	_sizeRom <<= (_romInfos.ROMsize + 5);
+	return  _sizeRom;
 }
