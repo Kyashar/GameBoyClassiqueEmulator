@@ -14,10 +14,11 @@ namespace gfx {
 	class Screen
 	{
 	public:
-		Screen();
-		~Screen();
+		Screen() = default;
+		~Screen() = default;
 
-//		void addSprite(sf::Vector2u &pos, );
+		void initWindow();
+		void addSprite(sf::Vector2u &pos);
 	private:
 		std::unique_ptr<sf::RenderWindow> _window;
 		/**

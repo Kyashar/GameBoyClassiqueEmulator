@@ -38,9 +38,8 @@ namespace rom
 		void readHeader();
 		size_t getRomSize();
 
-		std::vector<uint8_t> &getNintendoData() {
-			return _nintendoLogo;
-		}
+		std::vector<uint8_t> &getNintendoData();
+		std::vector<uint8_t> &getFile();
 
 	private:
 		std::ifstream _file;

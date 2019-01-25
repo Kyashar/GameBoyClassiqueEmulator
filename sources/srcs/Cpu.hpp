@@ -12,6 +12,7 @@
 #include <vector>
 #include "Memory.hpp"
 #include "Register.hpp"
+#include "gfx/Screen.hpp"
 
 namespace emulator
 {
@@ -43,7 +44,9 @@ namespace emulator
 		Register _register;
 		Clock _timer;
 		Memory _memory;
+		gfx::Screen _gpu;
 
+		size_t _romSize;
 		bool _read;
 	};
 }

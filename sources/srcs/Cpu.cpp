@@ -14,7 +14,7 @@ emulator::Cpu::Cpu(std::vector<uint8_t> &instructions) :
 	_register.pc = 0;
 	_register.sp = 0;
 	_memory.loadRom(instructions);
-//	_romSize = _instruction.size();
+	_romSize = instructions.size();
 }
 
 emulator::Cpu::~Cpu()
@@ -35,17 +35,16 @@ void emulator::Cpu::readInstruction()
 //	std::cout << (int)_instruction[_register.pc] << std::endl;
 	std::cout << managedInstruction[_memory[_register.pc]] << std::endl;
 
-	if (managedInstruction[_memory[_register.pc]]._length == 2) {
-		cData = *((char *) (&_memory[_register.pc]));
-		std::cout << "cData: " << std::to_string((int)cData) << std::endl;
-	} else if (managedInstruction[_memory[_register.pc]]._length == 3) {
-		sData = _memory.getShort(_register.pc);
-		std::cout << "sData: " << std::to_string((int)sData) << std::endl;
-	}
+//	if (managedInstruction[_memory[_register.pc]]._length == 2) {
+//		cData = *((char *) (&_memory[_register.pc]));
+//		std::cout << "cData: " << std::to_string((int)cData) << std::endl;
+//	} else if (managedInstruction[_memory[_register.pc]]._length == 3) {
+//		sData = _memory.getShort(_register.pc);
+//		std::cout << "sData: " << std::to_string((int)sData) << std::endl;
+//	}
 	_register.pc += managedInstruction[_memory[_register.pc]]._length;
-//	if (_register.pc > _romSize)
-//		exit(1);
-//	if (_register.pc > 55)
+	if (_register.pc > _romSize)
+		exit(1);
 }
 
 void emulator::Cpu::Nop()
@@ -289,7 +288,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"RET NC", 1, nullptr}, /* 0xD0 */
 	{"POP DE", 1, nullptr},
 	{"JP NC, a16", 3, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
 	{"CALL NC, a16", 3, nullptr},
 	{"PUSH DE", 1, nullptr},
 	{"SUB  d8", 1, nullptr},
@@ -297,26 +296,26 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"RET C", 1, nullptr},
 	{"RETI", 1, nullptr},
 	{"JP C, a16", 3, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
 	{"CALL C, a16", 3, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
 	{"SBC  A, d8", 2, nullptr},
 	{"RST 18H", 1, nullptr},
 
 	{"LDH a8, A", 2, nullptr}, /* 0xE0 */
 	{"POP HL", 1, nullptr},
 	{"LD (C), A", 1, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
 	{"PUSH HL", 1, nullptr},
 	{"AND  d8", 2, nullptr},
 	{"RST 20H", 1, nullptr},
 	{"ADD SP, r8", 2, nullptr},
 	{"JP (HL)", 1, nullptr},
 	{"LD (a16), A", 3, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
 	{"XOR  d8", 2, nullptr},
 	{"RST 28H", 1, nullptr},
 
@@ -324,7 +323,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"POP AF", 1, nullptr},
 	{"LD A, (C)", 1, nullptr},
 	{"DI", 1, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
 	{"PUSH AF", 1, nullptr},
 	{"OR  d8", 2, nullptr},
 	{"RST 30H", 1, nullptr},
@@ -332,8 +331,8 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"LD SP, HL", 1, nullptr},
 	{"LD A, (a16)", 3, nullptr},
 	{"EI", 1, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
-	{"NOT IMPLEMENTED", 0, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
+	{"NOT IMPLEMENTED", 1, nullptr},
 	{"CP  d8", 2, nullptr},
 	{"RST 38H", 1, nullptr},
 };

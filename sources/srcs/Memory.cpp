@@ -15,7 +15,7 @@ void emulator::Memory::loadRom(std::vector<uint8_t> &data)
 uint16_t emulator::Memory::getShort(int index)
 {
 	uint16_t first = (*this)[index];
-	uint16_t seconde = (*this)[index + 1] << 8;
+	uint16_t seconde = (*this)[(index + 1)] << 8;
 
 	uint16_t ret = first + seconde;
 	return ret;
@@ -30,16 +30,64 @@ uint16_t emulator::Memory::getShort(int index) const
 	return ret;
 }
 
-uint8_t &emulator::Memory::operator[](int index)
+uint8_t &emulator::Memory::operator[](int addr)
 {
-	if (index > static_cast<ssize_t>(_memory.size()) || index < 0)
+	if (addr > static_cast<ssize_t>(_memory.size()) || addr < 0)
 		throw std::runtime_error("not mapped address");
-	return _memory[index];
+
+	if (addr < 0x150 && !_biosReaded)	// BIOS
+		return _bios[addr];
+	else if (addr < 0x8000) 	// ROM
+		return _rom[addr];
+	else if (addr < 0xA000)		// VRAM
+		return _vram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
+	else if (addr < 0xC000)		// ERAM
+		return _eram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
+	else if (addr < 0xE000)		// WRWAM
+		return _wram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
+	else if (addr < 0xFE00)		//shadwo WRAM
+		return _wram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
+	else if (addr < 0xFEA0)		// OAM
+		return _oam[((unsigned int)addr) & ((unsigned int)0xFF)];
+	else if (addr < 0xFF00)		// unsabel memory
+		return zero;
+	else if (addr < 0xFF80)		// IO register
+		return zero;
+	else if (addr < 0xFFFF)		// zero page
+		return _oam[((unsigned int)addr) & ((unsigned int)0x7F)];
+
+	// interrupt enable flag
+//	return _memory[addr];
+	return zero;
 }
 
-const uint8_t &emulator::Memory::operator[](int index) const
+const uint8_t &emulator::Memory::operator[](int addr) const
 {
-	if (index > static_cast<ssize_t>(_memory.size()) || index < 0)
+	if (addr > static_cast<ssize_t>(_memory.size()) || addr < 0)
 		throw std::runtime_error("not mapped address");
-	return _memory[index];
+
+	if (addr < 0x150 && !_biosReaded)	// BIOS
+		return _bios[addr];
+	else if (addr < 0x8000) 	// ROM
+		return _rom[addr];
+	else if (addr < 0xA000)		// VRAM
+		return _vram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
+	else if (addr < 0xC000)		// ERAM
+		return _eram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
+	else if (addr < 0xE000)		// WRWAM
+		return _wram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
+	else if (addr < 0xFE00)		//shadwo WRAM
+		return _wram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
+	else if (addr < 0xFEA0)		// OAM
+		return _oam[((unsigned int)addr) & ((unsigned int)0xFF)];
+	else if (addr < 0xFF00)		// unsabel memory
+		return zero;
+	else if (addr < 0xFF80)		// IO register
+		return zero;
+	else if (addr < 0xFFFF)		// zero page
+		return _oam[((unsigned int)addr) & ((unsigned int)0x7F)];
+
+	// interrupt enable flag
+//	return _memory[addr];
+	return zero;
 }

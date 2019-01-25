@@ -51,15 +51,22 @@ rom::Reader::Reader(std::string fileName) :
 	_nintendoLogo.resize(256);
 }
 
+#include <sstream>
+
 void rom::Reader::readHeader()
 {
+	std::stringstream buffer;
+
 	_file.read(reinterpret_cast<char *>(_nintendoLogo.data()), _nintendoLogo.size());
 	_file.read(reinterpret_cast<char *>(&_romInfos), sizeof(_romInfos));
 	std::cout << _romInfos << std::endl;
 
 	std::cout << "size " << std::to_string(getRomSize()) << std::endl;
-	_fileContent.resize(getRomSize());
-	_file.read(reinterpret_cast<char *>(_fileContent.data()), _fileContent.size());
+	std::vector<unsigned char> buff(std::istreambuf_iterator<char>(_file), {});
+	_fileContent = buff;
+//	_fileContent.resize(getRomSize());
+//	_fileContent.
+//	_file.read(reinterpret_cast<char *>(_fileContent.data()), _fileContent.size());
 }
 
 size_t rom::Reader::getRomSize()
@@ -69,4 +76,14 @@ size_t rom::Reader::getRomSize()
 	_sizeRom = 1;
 	_sizeRom <<= (_romInfos.ROMsize + 5);
 	return  _sizeRom;
+}
+
+std::vector<uint8_t> &rom::Reader::getNintendoData()
+{
+	return _nintendoLogo;
+}
+
+std::vector<uint8_t> &rom::Reader::getFile()
+{
+	return _fileContent;
 }

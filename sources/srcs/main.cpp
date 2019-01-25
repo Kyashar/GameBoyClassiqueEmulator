@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	/**
 	 * Show nintendo Logo
 	 */
-	emulator::Cpu cpu(rom.getNintendoData());
+	emulator::Cpu cpu(rom.getFile());
 	while (cpu.gotSomethingToRead())
 		cpu.readInstruction();
 	return 0;
