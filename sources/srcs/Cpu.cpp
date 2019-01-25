@@ -8,11 +8,13 @@
 #include <iostream>
 #include "Cpu.hpp"
 
-emulator::Cpu::Cpu(std::vector<unsigned char> &instuctions) :
-	_instruction(instuctions), _read(true)
+emulator::Cpu::Cpu(std::vector<uint8_t> &instructions) :
+	_read(true)
 {
 	_register.pc = 0;
 	_register.sp = 0;
+	_memory.loadRom(instructions);
+//	_romSize = _instruction.size();
 }
 
 emulator::Cpu::~Cpu()
@@ -31,18 +33,19 @@ void emulator::Cpu::readInstruction()
 	short sData;
 
 //	std::cout << (int)_instruction[_register.pc] << std::endl;
-	std::cout << managedInstruction[_instruction[_register.pc]] << std::endl;
+	std::cout << managedInstruction[_memory[_register.pc]] << std::endl;
 
-	if (managedInstruction[_instruction[_register.pc]]._length == 2) {
-		cData = *((char *) (&_instruction[_register.pc]));
+	if (managedInstruction[_memory[_register.pc]]._length == 2) {
+		cData = *((char *) (&_memory[_register.pc]));
 		std::cout << "cData: " << std::to_string((int)cData) << std::endl;
-	} else if (managedInstruction[_instruction[_register.pc]]._length == 3) {
-		sData = *((short *) (&_instruction[_register.pc + 1]));
+	} else if (managedInstruction[_memory[_register.pc]]._length == 3) {
+		sData = _memory.getShort(_register.pc);
 		std::cout << "sData: " << std::to_string((int)sData) << std::endl;
 	}
-	_register.pc += managedInstruction[_instruction[_register.pc]]._length;
-	if (_register.pc > 55)
-		exit(1);
+	_register.pc += managedInstruction[_memory[_register.pc]]._length;
+//	if (_register.pc > _romSize)
+//		exit(1);
+//	if (_register.pc > 55)
 }
 
 void emulator::Cpu::Nop()

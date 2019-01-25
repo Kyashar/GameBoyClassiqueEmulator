@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include "Memory.hpp"
 #include "Register.hpp"
 
 namespace emulator
@@ -24,7 +25,7 @@ namespace emulator
 			void (Cpu::*instruction)();
 		};
 
-		Cpu(std::vector<unsigned char> &instuctions);
+		explicit Cpu(std::vector<uint8_t> &instuctions);
 		~Cpu();
 
 		bool gotSomethingToRead() const;
@@ -40,7 +41,9 @@ namespace emulator
 		static std::vector<instructionInfos> managedInstruction;
 
 		Register _register;
-		std::vector<unsigned char> _instruction;
+		Clock _timer;
+		Memory _memory;
+
 		bool _read;
 	};
 }

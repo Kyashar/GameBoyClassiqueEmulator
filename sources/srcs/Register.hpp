@@ -51,8 +51,21 @@ namespace emulator
 			};
 		};
 
+		struct {
+			union {
+				struct {
+					unsigned char m;
+					unsigned char t;
+				};
+				unsigned short mt;
+			};
+		};
 		unsigned short sp;
 		unsigned short pc;
+	};
+	struct Clock {
+		unsigned char m;
+		unsigned char t;
 	};
 }
 
