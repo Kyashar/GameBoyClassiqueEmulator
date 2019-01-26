@@ -14,13 +14,22 @@ namespace gfx {
 	class Screen
 	{
 	public:
-		Screen() = default;
+		Screen();
 		~Screen() = default;
 
 		void initWindow();
-		void addSprite(sf::Vector2u &pos);
+		void put();
 	private:
+		void Hblank();
+		void Vblank();
+		void ObjectRead();
+		void render();
+
+		std::array<sf::Vertex, 23040> _pixels;
 		std::unique_ptr<sf::RenderWindow> _window;
+
+		size_t _clock;
+		char _mode;
 		/**
 		 *  @location: SCROLLX, SCROOLY register
 		 */
@@ -32,6 +41,7 @@ namespace gfx {
 		 * (SCROLLX, SCROLLY register hold up left corner to begin display)
 		 */
 		std::array<std::array<unsigned char, 32>, 32> _screen;
+
 	};
 }
 

@@ -23,8 +23,8 @@ uint16_t emulator::Memory::getShort(int index)
 
 uint16_t emulator::Memory::getShort(int index) const
 {
-	uint16_t first = (*this)[index];
-	uint16_t seconde = (*this)[index + 1] << 8;
+	uint16_t first = operator[](index);
+	uint16_t seconde = operator[](index + 1) << 8;
 
 	uint16_t ret = first + seconde;
 	return ret;
@@ -55,9 +55,6 @@ uint8_t &emulator::Memory::operator[](int addr)
 		return zero;
 	else if (addr < 0xFFFF)		// zero page
 		return _oam[((unsigned int)addr) & ((unsigned int)0x7F)];
-
-	// interrupt enable flag
-//	return _memory[addr];
 	return zero;
 }
 
@@ -86,8 +83,5 @@ const uint8_t &emulator::Memory::operator[](int addr) const
 		return zero;
 	else if (addr < 0xFFFF)		// zero page
 		return _oam[((unsigned int)addr) & ((unsigned int)0x7F)];
-
-	// interrupt enable flag
-//	return _memory[addr];
 	return zero;
 }

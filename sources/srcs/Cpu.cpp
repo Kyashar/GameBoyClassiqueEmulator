@@ -15,6 +15,8 @@ emulator::Cpu::Cpu(std::vector<uint8_t> &instructions) :
 	_register.sp = 0;
 	_memory.loadRom(instructions);
 	_romSize = instructions.size();
+
+	_gpu.initWindow();
 }
 
 emulator::Cpu::~Cpu()
