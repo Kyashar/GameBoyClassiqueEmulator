@@ -11,14 +11,29 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 namespace gfx {
+
 	class Screen
 	{
+		class ScreenLine
+		{
+		public:
+			ScreenLine(std::array<sf::Vertex, 23040> &array, size_t height) :
+				_array(array), _height(height) {}
+			~ScreenLine() = default;
+
+			sf::Vertex &operator[](size_t width) {
+				return _array[_height * 160 + width];
+			}
+		private:
+			std::array<sf::Vertex, 23040> &_array;
+			size_t _height;
+		};
 	public:
 		Screen();
 		~Screen() = default;
 
 		void initWindow();
-		void put();
+		void put(size_t timer);
 	private:
 		void Hblank();
 		void Vblank();
@@ -28,6 +43,7 @@ namespace gfx {
 		std::array<sf::Vertex, 23040> _pixels;
 		std::unique_ptr<sf::RenderWindow> _window;
 
+		size_t _line;
 		size_t _clock;
 		char _mode;
 		/**
