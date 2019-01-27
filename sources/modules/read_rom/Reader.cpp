@@ -45,7 +45,7 @@ std::ostream &operator<<(std::ostream &os, const rom::Reader::RomInfos &infos)
 }
 
 
-rom::Reader::Reader(std::string fileName) :
+rom::Reader::Reader(std::string &fileName) :
 	_file(fileName)
 {
 	_nintendoLogo.resize(256);

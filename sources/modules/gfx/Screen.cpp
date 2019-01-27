@@ -33,6 +33,15 @@ void gfx::Screen::initWindow()
 void gfx::Screen::put(size_t timer)
 {
 	_clock +=  timer;
+
+	if (_mode == 0)
+		Hblank();
+	else if (_mode == 1)
+		Vblank();
+	else if (_mode == 2)
+		ObjectRead();
+	else if (_mode == 3)
+		render();
 }
 
 void gfx::Screen::Hblank()
@@ -80,5 +89,5 @@ void gfx::Screen::render()
 	_clock = 0;
 	_mode = 0;
 
-	// write a scaneLine to the buffer
+	// write a scanLine to the buffer
 }

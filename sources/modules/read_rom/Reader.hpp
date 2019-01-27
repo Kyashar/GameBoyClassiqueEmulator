@@ -34,7 +34,7 @@ namespace rom
 			std::uint16_t GlobalChecksum;
 		};
 
-		explicit Reader(std::string fileName);
+		explicit Reader(std::string &fileName);
 		void readHeader();
 		size_t getRomSize();
 

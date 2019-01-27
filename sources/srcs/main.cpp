@@ -13,10 +13,11 @@ int main(int argc, char **argv)
 		std::cout << "./emulator rom.gba" << std::endl;
 		return 1;
 	}
+	std::string fileName(argv[1]);
 	/**
 	 * read rom
 	 */
-	rom::Reader rom(argv[1]);
+	rom::Reader rom(fileName);
 	rom.readHeader();
 
 	/**

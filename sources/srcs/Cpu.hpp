@@ -24,6 +24,7 @@ namespace emulator
 			std::string _name;
 			unsigned char _length;
 			void (Cpu::*instruction)();
+			unsigned char _timer;
 		};
 
 		explicit Cpu(std::vector<uint8_t> &instuctions);
