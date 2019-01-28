@@ -5,6 +5,7 @@
 **      Made on 2019/01 by ebernard
 */
 
+#include <sstream>
 #include <cmath>
 #include <iostream>
 #include "Reader.hpp"
@@ -51,8 +52,6 @@ rom::Reader::Reader(std::string &fileName) :
 	_nintendoLogo.resize(256);
 }
 
-#include <sstream>
-
 void rom::Reader::readHeader()
 {
 	std::stringstream buffer;
@@ -64,9 +63,6 @@ void rom::Reader::readHeader()
 	std::cout << "size " << std::to_string(getRomSize()) << std::endl;
 	std::vector<unsigned char> buff(std::istreambuf_iterator<char>(_file), {});
 	_fileContent = buff;
-//	_fileContent.resize(getRomSize());
-//	_fileContent.
-//	_file.read(reinterpret_cast<char *>(_fileContent.data()), _fileContent.size());
 }
 
 size_t rom::Reader::getRomSize()

@@ -10,6 +10,17 @@
 gfx::Screen::Screen() :
 	_line (0), _clock(0), _mode(0), _beginDisplay(0, 0), _screen()
 {
+	sf::Vector2f pos = {0, 1};
+
+	for (auto &elem  : _pixels) {
+		elem.position = pos;
+		elem.color = sf::Color::Black;
+		pos.x++;
+		if (pos.x == 160) {
+			pos.x = 0;
+			pos.y++;
+		}
+	}
 }
 
 /**
@@ -18,9 +29,20 @@ gfx::Screen::Screen() :
 void gfx::Screen::initWindow()
 {
 	_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(160, 144, 4), "EmulIt");
-	_window->clear(sf::Color::Red);
-	_window->draw(_pixels.data(), _pixels.size(), sf::Points);
+	resetScreen();
 	_window->display();
+}
+
+/**
+ * Reset Screen color to black
+ */
+void gfx::Screen::resetScreen()
+{
+
+	for (auto &elem : _pixels){
+		elem.color = sf::Color::Red;
+	}
+	_window->draw(_pixels.data(), _pixels.size(), sf::Points);
 }
 
 /**
@@ -53,7 +75,6 @@ void gfx::Screen::Hblank()
 
 	if (_line == 143) {
 		_mode = 1;
-		// Render on window;
 		_window->clear(sf::Color::Red);
 		_window->draw(_pixels.data(), _pixels.size(), sf::Points);
 		_window->display();
@@ -89,5 +110,20 @@ void gfx::Screen::render()
 	_clock = 0;
 	_mode = 0;
 
-	// write a scanLine to the buffer
+	for (size_t i = 0; i < 160; i++) {
+		(*this)[_line][i].color = sf::Color::Black;
+		// (*this)[_line][i].color = getColorFromValue();
+		// write a scanLine to the buffer
+	}
+}
+
+sf::Color gfx::Screen::getColorFromValue(int value)
+{
+	if (value == 0)
+		return sf::Color(255, 255, 255);
+	if (value == 1)
+		return sf::Color(192, 192, 192);
+	if (value == 2)
+		return sf::Color(96, 96, 96);
+	return sf::Color(0, 0, 0);
 }

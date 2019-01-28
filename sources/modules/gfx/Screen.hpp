@@ -14,7 +14,7 @@ namespace gfx {
 
 	class Screen
 	{
-		class ScreenLine
+		struct ScreenLine
 		{
 		public:
 			ScreenLine(std::array<sf::Vertex, 23040> &array, size_t height) :
@@ -32,13 +32,19 @@ namespace gfx {
 		Screen();
 		~Screen() = default;
 
+		ScreenLine operator[](size_t height) {
+			return {_pixels, height};
+		}
 		void initWindow();
 		void put(size_t timer);
 	private:
+		void resetScreen();
 		void Hblank();
 		void Vblank();
 		void ObjectRead();
 		void render();
+
+		sf::Color getColorFromValue(int value);
 
 		std::array<sf::Vertex, 23040> _pixels;
 		std::unique_ptr<sf::RenderWindow> _window;
