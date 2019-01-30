@@ -7,8 +7,8 @@
 
 #include "Screen.hpp"
 
-gfx::Screen::Screen() :
-	_line (0), _clock(0), _mode(0), _beginDisplay(0, 0), _screen()
+gfx::Screen::Screen(emulator::Memory &mem) :
+	_memory(mem), _line (0), _clock(0), _mode(0), _beginDisplay(0, 0)
 {
 	sf::Vector2f pos = {0, 1};
 
@@ -38,9 +38,8 @@ void gfx::Screen::initWindow()
  */
 void gfx::Screen::resetScreen()
 {
-
 	for (auto &elem : _pixels){
-		elem.color = sf::Color::Red;
+		elem.color = sf::Color::Black;
 	}
 	_window->draw(_pixels.data(), _pixels.size(), sf::Points);
 }
@@ -66,9 +65,13 @@ void gfx::Screen::put(size_t timer)
 		render();
 }
 
+/**
+ * emulate gpu timer
+ * horizontal blank line after each line can
+ */
 void gfx::Screen::Hblank()
 {
-	if (_clock >= 204)
+	if (_clock <= 204)
 		return ;
 	_line++;
 	_clock = 0;
@@ -83,9 +86,13 @@ void gfx::Screen::Hblank()
 	}
 }
 
+
+/**
+ * emulate gpu timer for vertical blank line.
+ */
 void gfx::Screen::Vblank()
 {
-	if (_clock >= 456)
+	if (_clock <= 456)
 		return ;
 	_mode = 0;
 	_line++;
@@ -97,7 +104,7 @@ void gfx::Screen::Vblank()
 
 void gfx::Screen::ObjectRead()
 {
-	if (_clock >= 80)
+	if (_clock <= 80)
 		return ;
 	_clock = 0;
 	_mode = 3;
@@ -105,20 +112,29 @@ void gfx::Screen::ObjectRead()
 
 void gfx::Screen::render()
 {
-	if (_clock >= 172)
+	if (_clock <= 172)
 		return ;
+
+	unsigned char bit;
 	_clock = 0;
 	_mode = 0;
 
-	for (size_t i = 0; i < 160; i++) {
-		(*this)[_line][i].color = sf::Color::Black;
-		// (*this)[_line][i].color = getColorFromValue();
+	// get addr from tile for line and index
+	for (size_t i = 0; i < 160;) {
+		bit = 1;
+		do {
+			(*this)[_line][i].color = sf::Color::Black;
+			bit <<= 1;
+			i++;
+		} while ((i / 8) != 0 && i < 160);
 		// write a scanLine to the buffer
 	}
 }
 
-sf::Color gfx::Screen::getColorFromValue(int value)
+sf::Color gfx::Screen::getColorFromValue(int address, unsigned char bit)
 {
+	int value = (_memory[address] & bit) + (_memory[address + 1] & bit);
+
 	if (value == 0)
 		return sf::Color(255, 255, 255);
 	if (value == 1)

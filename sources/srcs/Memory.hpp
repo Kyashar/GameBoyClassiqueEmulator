@@ -43,7 +43,8 @@ namespace emulator
 	class Memory
 	{
 	public:
-		Memory() : _biosReaded(true) {}
+		Memory() : _memory(), _biosReaded(true), _bios(), _rom(), _vram(),
+			   _eram(), _wram(), _oam(), _zram() {}
 		~Memory() = default;
 
 		void loadRom(std::vector<uint8_t> &data);

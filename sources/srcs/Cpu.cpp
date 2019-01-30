@@ -9,7 +9,7 @@
 #include "Cpu.hpp"
 
 emulator::Cpu::Cpu(std::vector<uint8_t> &instructions) :
-	_read(true)
+	_read(true), _gpu(_memory)
 {
 	_register.pc = 0;
 	_register.sp = 0;
