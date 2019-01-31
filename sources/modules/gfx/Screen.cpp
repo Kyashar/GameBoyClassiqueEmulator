@@ -28,7 +28,7 @@ gfx::Screen::Screen(emulator::Memory &mem) :
  */
 void gfx::Screen::initWindow()
 {
-	_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(160, 144, 4), "EmulIt");
+	_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(160, 144, 4), "EmulIt", sf::Style::Titlebar | sf::Style::Close);
 	resetScreen();
 	_window->display();
 }
