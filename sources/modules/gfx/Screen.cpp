@@ -115,6 +115,7 @@ void gfx::Screen::render()
 	if (_clock <= 172)
 		return ;
 
+	int addr = 0;
 	unsigned char bit;
 	_clock = 0;
 	_mode = 0;
@@ -122,12 +123,16 @@ void gfx::Screen::render()
 	// get addr from tile for line and index
 	for (size_t i = 0; i < 160;) {
 		bit = 1;
+		// get the address from the line of the buffer
 		do {
 			(*this)[_line][i].color = sf::Color::Black;
-			bit <<= 1;
+			std::cout << "bit: " << std::dec << static_cast<unsigned>(bit) << std::endl;
+
+			// write a scanLine to the buffer
+
+			bit <<= (unsigned int)1;
 			i++;
-		} while ((i / 8) != 0 && i < 160);
-		// write a scanLine to the buffer
+		} while ((i % 8) != 0 && i < 160);
 	}
 }
 

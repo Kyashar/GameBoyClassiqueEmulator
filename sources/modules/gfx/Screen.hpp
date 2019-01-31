@@ -31,7 +31,7 @@ namespace gfx {
 			size_t _height;
 		};
 	public:
-		Screen(emulator::Memory &mem);
+		explicit Screen(emulator::Memory &mem);
 		~Screen() = default;
 
 		ScreenLine operator[](size_t height) {

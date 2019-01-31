@@ -35,7 +35,7 @@ void emulator::Cpu::readInstruction()
 	short sData;
 
 //	std::cout << (int)_instruction[_register.pc] << std::endl;
-	std::cout << managedInstruction[_memory[_register.pc]] << std::endl;
+//	std::cout << managedInstruction[_memory[_register.pc]] << std::endl;
 
 //	if (managedInstruction[_memory[_register.pc]]._length == 2) {
 //		cData = *((char *) (&_memory[_register.pc]));
