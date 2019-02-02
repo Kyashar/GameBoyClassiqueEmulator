@@ -28,7 +28,7 @@ gfx::Screen::Screen(emulator::Memory &mem) :
  */
 void gfx::Screen::initWindow()
 {
-	_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(160, 144, 4), "EmulIt", sf::Style::Titlebar | sf::Style::Close);
+	_window = std::make_unique<sf::RenderWindow>(sf::VideoMode(160, 144), "EmulIt", sf::Style::Close);
 	resetScreen();
 	_window->display();
 }
@@ -62,7 +62,7 @@ void gfx::Screen::put(size_t timer)
 	else if (_mode == 2)
 		ObjectRead();
 	else if (_mode == 3)
-		render();
+		renderLine();
 }
 
 /**
@@ -110,33 +110,46 @@ void gfx::Screen::ObjectRead()
 	_mode = 3;
 }
 
-void gfx::Screen::render()
+int gfx::Screen::getAdressFromTile(int tileNb)
+{
+	int adress = _bgMap ?  0x8000 : 8800;
+
+	if (!_bgMap)
+		tileNb += 128;
+
+	return adress + tileNb * 2;
+}
+
+void gfx::Screen::renderLine()
 {
 	if (_clock <= 172)
 		return ;
 
-	int addr = 0;
+	int addr = _bgMap ? 0x9C00 : 0x9800;
+	auto lineoffs = (_beginDisplay.x / 8);
 	unsigned char bit;
 	_clock = 0;
 	_mode = 0;
 
+	// Which line of tiles to use in the map
+	addr += (_line + _beginDisplay.y) / 8;
+
+	// Which tile to start with in the map line
+	size_t tileNumber;
+
 	// get addr from tile for line and index
 	for (size_t i = 0; i < 160;) {
 		bit = 1;
-		// get the address from the line of the buffer
+		tileNumber = _memory[addr + lineoffs + i / 8];
 		do {
-			(*this)[_line][i].color = sf::Color::Black;
-			std::cout << "bit: " << std::dec << static_cast<unsigned>(bit) << std::endl;
-
-			// write a scanLine to the buffer
-
+			(*this)[_line][i].color = getColorFromAdress(getAdressFromTile(tileNumber), bit);
 			bit <<= (unsigned int)1;
 			i++;
 		} while ((i % 8) != 0 && i < 160);
 	}
 }
 
-sf::Color gfx::Screen::getColorFromValue(int address, unsigned char bit)
+sf::Color gfx::Screen::getColorFromAdress(int address, unsigned char bit)
 {
 	int value = (_memory[address] & bit) + (_memory[address + 1] & bit);
 

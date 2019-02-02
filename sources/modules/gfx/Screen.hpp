@@ -44,15 +44,18 @@ namespace gfx {
 		void Hblank();
 		void Vblank();
 		void ObjectRead();
-		void render();
+		void renderLine();
+		int getAdressFromTile(int tileNB);
 
 //		void setSpriteSet();
-		sf::Color getColorFromValue(int value, unsigned char bit);
+		sf::Color getColorFromAdress(int value, unsigned char bit);
 
 		std::unique_ptr<sf::RenderWindow> _window;
 
 		emulator::Memory &_memory;
 		std::array<sf::Vertex, 23040> _pixels;
+
+		bool _bgMap;
 
 		size_t _line;
 		size_t _clock;
