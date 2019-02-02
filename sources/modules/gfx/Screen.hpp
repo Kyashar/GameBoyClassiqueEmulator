@@ -45,10 +45,10 @@ namespace gfx {
 		void Vblank();
 		void ObjectRead();
 		void renderLine();
-		int getAdressFromTile(int tileNB);
+		int getAddressFromTile(int tileNB);
 
 //		void setSpriteSet();
-		sf::Color getColorFromAdress(int value, unsigned char bit);
+		sf::Color getColorFromAddress(int value, unsigned char bit);
 
 		std::unique_ptr<sf::RenderWindow> _window;
 
@@ -56,6 +56,7 @@ namespace gfx {
 		std::array<sf::Vertex, 23040> _pixels;
 
 		bool _bgMap;
+		bool _bgTile;
 
 		size_t _line;
 		size_t _clock;

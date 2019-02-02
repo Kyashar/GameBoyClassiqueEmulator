@@ -8,7 +8,7 @@
 #include "Screen.hpp"
 
 gfx::Screen::Screen(emulator::Memory &mem) :
-	_memory(mem), _line (0), _clock(0), _mode(0), _beginDisplay(0, 0)
+	_memory(mem), _bgMap(false), _line(0), _clock(0), _mode(0), _beginDisplay(0, 0)
 {
 	sf::Vector2f pos = {0, 1};
 
@@ -110,14 +110,12 @@ void gfx::Screen::ObjectRead()
 	_mode = 3;
 }
 
-int gfx::Screen::getAdressFromTile(int tileNb)
+int gfx::Screen::getAddressFromTile(int tileNb)
 {
-	int adress = _bgMap ?  0x8000 : 8800;
+	if (!_bgTile)
+		tileNb += 256;
 
-	if (!_bgMap)
-		tileNb += 128;
-
-	return adress + tileNb * 2;
+	return 0x8000 + tileNb * 2;
 }
 
 void gfx::Screen::renderLine()
@@ -125,6 +123,7 @@ void gfx::Screen::renderLine()
 	if (_clock <= 172)
 		return ;
 
+	size_t tileNumber;
 	int addr = _bgMap ? 0x9C00 : 0x9800;
 	auto lineoffs = (_beginDisplay.x / 8);
 	unsigned char bit;
@@ -134,22 +133,19 @@ void gfx::Screen::renderLine()
 	// Which line of tiles to use in the map
 	addr += (_line + _beginDisplay.y) / 8;
 
-	// Which tile to start with in the map line
-	size_t tileNumber;
-
 	// get addr from tile for line and index
 	for (size_t i = 0; i < 160;) {
 		bit = 1;
 		tileNumber = _memory[addr + lineoffs + i / 8];
 		do {
-			(*this)[_line][i].color = getColorFromAdress(getAdressFromTile(tileNumber), bit);
-			bit <<= (unsigned int)1;
+			(*this)[_line][i].color = getColorFromAddress(getAddressFromTile(tileNumber), bit);
+			bit <<= 1;
 			i++;
 		} while ((i % 8) != 0 && i < 160);
 	}
 }
 
-sf::Color gfx::Screen::getColorFromAdress(int address, unsigned char bit)
+sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit)
 {
 	int value = (_memory[address] & bit) + (_memory[address + 1] & bit);
 
