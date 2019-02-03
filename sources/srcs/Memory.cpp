@@ -32,7 +32,7 @@ uint16_t emulator::Memory::getShort(int index) const
 
 uint8_t &emulator::Memory::operator[](int addr)
 {
-	if (addr > static_cast<ssize_t>(_memory.size()) || addr < 0)
+	if (addr > 0xFFFF || addr < 0)
 		throw std::runtime_error("not mapped address");
 
 	if (addr < 0x150 && !_biosReaded)	// BIOS
@@ -60,7 +60,7 @@ uint8_t &emulator::Memory::operator[](int addr)
 
 const uint8_t &emulator::Memory::operator[](int addr) const
 {
-	if (addr > static_cast<ssize_t>(_memory.size()) || addr < 0)
+	if (addr > 0xFFFF || addr < 0)
 		throw std::runtime_error("not mapped address");
 
 	if (addr < 0x150 && !_biosReaded)	// BIOS

@@ -8,6 +8,7 @@
 #ifndef EMULATOR_GAMEBOY_MEMORY_HPP
 #define EMULATOR_GAMEBOY_MEMORY_HPP
 
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <vector>
 #include <array>
 
@@ -43,20 +44,43 @@ namespace emulator
 	class Memory
 	{
 	public:
-		Memory() : _memory(), _biosReaded(true), _bios(), _rom(), _vram(),
+		struct GpuRegister {
+			GpuRegister() : gpuControl(0), beginDisplay(0, 0), line(0), bgPalette(0) {}
+			unsigned int &operator[](size_t address) {
+				if (address == 0xFF40)
+					return gpuControl;
+				if (address == 0xFF42)
+					return beginDisplay.y;
+				if (address == 0xFF43)
+					return beginDisplay.x;
+				if (address == 0xFF44)
+					return line;
+				return bgPalette;
+			}
+
+			unsigned int gpuControl;
+			sf::Vector2u beginDisplay;
+			unsigned int line;
+			unsigned int bgPalette;
+		};
+
+		Memory() : _biosReaded(true), _bios(), _rom(), _vram(),
 			   _eram(), _wram(), _oam(), _zram() {}
 		~Memory() = default;
 
 		void loadRom(std::vector<uint8_t> &data);
 		uint16_t getShort(int index);
-		uint16_t getShort(int index)  const;
+		uint16_t getShort(int index) const;
 
+		const GpuRegister  &getGpuRegister() const {return _registerGpu;}
 		uint8_t &operator[](int index);
 		const uint8_t &operator[](int index) const;
 	private:
+//		std::array<uint8_t , 65536> _memory;
+
 		uint8_t zero = 0;
-		std::array<uint8_t , 65536> _memory;
 		bool _biosReaded;
+		GpuRegister _registerGpu;
 
 		/**
 		 * each memory is in different array
