@@ -149,11 +149,11 @@ sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit)
 {
 	int value = (_memory[address] & bit) + (_memory[address + 1] & bit);
 
-	if (value == 0)
+	if (0 == _memory.getGpuRegister().getPalette(value))
 		return sf::Color(255, 255, 255);
-	if (value == 1)
+	if (1 == _memory.getGpuRegister().getPalette(value))
 		return sf::Color(192, 192, 192);
-	if (value == 2)
+	if (2 == _memory.getGpuRegister().getPalette(value))
 		return sf::Color(96, 96, 96);
 	return sf::Color(0, 0, 0);
 }

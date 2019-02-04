@@ -63,11 +63,11 @@ namespace emulator
 				return bgPalette;
 			}
 
-			unsigned int &getControl() {return gpuControl;}
-			sf::Vector2u &getDisplay() {return beginDisplay;}
-			unsigned int &getLine() {return line;}
-			unsigned int &getPalette() {return bgPalette;}
-			unsigned int gettPalette(unsigned int index) {
+			const unsigned int &getControl() const {return gpuControl;}
+			const sf::Vector2u &getDisplay() const {return beginDisplay;}
+			const unsigned int &getLine() const {return line;}
+			const unsigned int &getPalette() const {return bgPalette;}
+			unsigned int getPalette(unsigned int index) const  {
 				unsigned int masque = 3;
 				return bgPalette & (masque << (index * 2));
 			}
@@ -111,7 +111,7 @@ namespace emulator
 
 		uint8_t zero = 0;
 		bool _biosReaded;
-		GpuRegister _registerGpu;
+		GpuRegister _registerGpu; // 0xFF40 -> 0xFF48
 
 		/**
 		 * each memory is in different array
