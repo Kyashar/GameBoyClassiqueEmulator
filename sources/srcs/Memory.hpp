@@ -8,6 +8,7 @@
 #ifndef EMULATOR_GAMEBOY_MEMORY_HPP
 #define EMULATOR_GAMEBOY_MEMORY_HPP
 
+#include <iostream>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <vector>
 #include <array>
@@ -46,6 +47,7 @@ namespace emulator
 	public:
 		struct GpuRegister {
 			GpuRegister() : gpuControl(0), beginDisplay(0, 0), line(0), bgPalette(0) {}
+			GpuRegister(sf::Vector2u &display, unsigned int &l) : gpuControl(0), beginDisplay(display), line(l), bgPalette(0) {}
 			unsigned int &operator[](size_t address) {
 				if (address == 0xFF40)
 					return gpuControl;
@@ -55,16 +57,45 @@ namespace emulator
 					return beginDisplay.x;
 				if (address == 0xFF44)
 					return line;
+				if (address == 0xFF47)
+					return bgPalette;
+				std::cout << "ERROR" << std::endl;
 				return bgPalette;
+			}
+
+			unsigned int &getControl() {return gpuControl;}
+			sf::Vector2u &getDisplay() {return beginDisplay;}
+			unsigned int &getLine() {return line;}
+			unsigned int &getPalette() {return bgPalette;}
+			unsigned int gettPalette(unsigned int index) {
+				unsigned int masque = 3;
+				return bgPalette & (masque << (index * 2));
+			}
+
+			bool background() {return gpuControl & 0b1;}
+			bool sprite() {return gpuControl & 0b10;}
+			sf::Vector2u spriteSize() {return gpuControl & 0b100 ? sf::Vector2u(8, 8) : sf::Vector2u(8, 16);}
+			bool bgTileMap() {return gpuControl & 0b1000;}
+			bool bgTileSet() {return gpuControl & 0b10000;}
+			bool window() {return gpuControl & 0b100000;}
+			bool windowTileMap() {return gpuControl & 0b1000000;}
+			bool display() {return gpuControl & 0b10000000;}
+
+			void setPalette(unsigned int index, unsigned int value) {
+				unsigned int tmp = 0b11111111;
+				tmp &=
+				bgPalette &= ~(0b11 << (index * 2));
+				bgPalette = (bgPalette | (value << (index * 2)));
 			}
 
 			unsigned int gpuControl;
 			sf::Vector2u beginDisplay;
 			unsigned int line;
 			unsigned int bgPalette;
+
 		};
 
-		Memory() : _biosReaded(true), _bios(), _rom(), _vram(),
+		Memory() : _biosReaded(true),_bios(), _rom(), _vram(),
 			   _eram(), _wram(), _oam(), _zram() {}
 		~Memory() = default;
 
