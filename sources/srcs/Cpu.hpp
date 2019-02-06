@@ -37,7 +37,7 @@ namespace emulator
 		void readInstruction();
 
 		void Nop(uint16_t) {} /* 0x00 */
-		void Ld_BC(uint16_t arg) {_register.bc = _memory.getShort(_register.pc + arg);}
+		void Ld_BC(uint16_t arg) {_register.bc = arg;}
 		void Ld_BC_A(uint16_t) {_memory[_register.pc + _register.bc] = _register.a;}
 		void Inc_BC(uint16_t) {_register.bc++;}
 		void Inc_B(uint16_t) {_register.b++;}
@@ -45,21 +45,27 @@ namespace emulator
 		void Ld_B(uint16_t) {_register.b = _memory[_register.pc];};
 		void Rlca(uint16_t) {
 			auto ci = _register.a & 0b10000000 ? 1 : 0;
-			auto co = _register.a & 0b10000000 ? 1 : 0;
 
 			_register.a = (_register.a << 1) + ci;
-			_register.setFlagsC(co);
+			_register.setFlagsC(ci);
 		};
-		void Ld_SP(uint16_t) { }
-		void Add_HL_BC(uint16_t) {}
-		void Ld_A_BC(uint16_t) {}
-		void Dec_BC(uint16_t) {}
-		void Inc_C(uint16_t) {}
-		void Dec_C(uint16_t) {}
-		void Ld_C(uint16_t) {}
-		void Rrca(uint16_t) {}
+		void Ld_SP(uint16_t arg) {_memory[_register.pc + arg] = _register.sp;}
+		void Add_HL_BC(uint16_t) {_register.hl += _register.bc;}
+		void Ld_A_BC(uint16_t) {_register.a = _memory[_register.pc + _register.bc];}
+		void Dec_BC(uint16_t) {_register.bc--;}
+		void Inc_C(uint16_t) {_register.c++;}
+		void Dec_C(uint16_t) {_register.c--;}
+		void Ld_C(uint16_t arg) {_register.c = arg;}
+		void Rrca(uint16_t) {
+			auto ci = _register.a & 0b00000001 ? 0b10000000 : 0;
+			auto co = _register.a & 0b00000001;
 
-		void Stop(uint16_t) {} /*0x10 */
+			_register.a = (_register.a >> 1) + ci;
+			_register.setFlagsC(co);
+		}
+
+		void Stop(uint16_t arg) { std::cout << "STOP: " << arg << std::endl; std::cout << "enter slow mode, what to do ?" << arg << std::endl;
+		} /*0x10 */
 
 		void default_operator(uint16_t) {std::cout << "unknown operand: " << managedInstruction[_memory[_register.pc]]._name << std::endl; }
 
