@@ -36,7 +36,9 @@ namespace emulator
 		 */
 		void readInstruction();
 
-		void Nop(uint16_t) {} /* 0x00 */
+	private:
+		/* 0x00 */
+		void Nop(uint16_t) {}
 		void Ld_BC(uint16_t arg) {_register.bc = arg;}
 		void Ld_BC_A(uint16_t) {_memory[_register.pc + _register.bc] = _register.a;}
 		void Inc_BC(uint16_t) {_register.bc++;}
@@ -47,10 +49,10 @@ namespace emulator
 			auto ci = _register.a & 0b10000000 ? 1 : 0;
 
 			_register.a = (_register.a << 1) + ci;
-			_register.setFlagsC(ci);
+			_register.setFlagC(ci);
 		};
 		void Ld_SP(uint16_t arg) {_memory[_register.pc + arg] = _register.sp;}
-		void Add_HL_BC(uint16_t) {_register.hl += _register.bc;}
+		void Add_HL_BC(uint16_t) {_register.hl += _register.bc; _register.setFlagN(false);}
 		void Ld_A_BC(uint16_t) {_register.a = _memory[_register.pc + _register.bc];}
 		void Dec_BC(uint16_t) {_register.bc--;}
 		void Inc_C(uint16_t) {_register.c++;}
@@ -61,15 +63,30 @@ namespace emulator
 			auto co = _register.a & 0b00000001;
 
 			_register.a = (_register.a >> 1) + ci;
-			_register.setFlagsC(co);
+			_register.setFlagC(co);
 		}
 
-		void Stop(uint16_t arg) { std::cout << "STOP: " << arg << std::endl; std::cout << "enter slow mode, what to do ?" << arg << std::endl;
-		} /*0x10 */
+		/*0x10 */
+		void Stop(uint16_t arg) { std::cout << "STOP: " << arg << std::endl << "enter slow mode, what to do ?" << arg << std::endl;
+		}
+		void Ld_DE(uint16_t arg) {_register.de = arg;}
+		void Ld_DE_A(uint16_t) {_memory[_register.pc + _register.de] = _register.a;}
+		void Inc_DE(uint16_t) {_register.de++;}
+		void Inc_D(uint16_t) {_register.d++;}
+		void Dec_D(uint16_t) {_register.d--;}
+		void Ld_D(uint16_t arg) {_register.e = arg;}
+		void Rla(uint16_t) {
+			auto ci= _register.getFlagC();
+			auto co= (_register.a & 0b10000000) != 0;
+
+			_register.a= (_register.a << 1) + ci;
+			_register.setFlagC(co);
+		}
+		void Jr(uint16_t arg) {_register.pc += arg;}
+		void Add_Hl_De(uint16_t) { _register.hl += _register.de; _register.setFlagN(false);}
 
 		void default_operator(uint16_t) {std::cout << "unknown operand: " << managedInstruction[_memory[_register.pc]]._name << std::endl; }
 
-	private:
 		static std::vector<instructionInfos> managedInstruction;
 
 		Register _register;

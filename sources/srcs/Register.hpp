@@ -63,17 +63,29 @@ namespace emulator
 		unsigned short sp;
 		unsigned short pc;
 
-		void setFlagsZ(bool b) {
+		void setFlagZ(bool b) {
 			f = (f & 0b01111111) + (b ? 0b10000000 : 0);
 		}
-		void setFlagsN(bool b) {
+		void setFlagN(bool b) {
 			f = (f & 0b10111111) + (b ? 0b01000000 : 0);
 		}
-		void setFlagsH(bool b) {
+		void setFlagH(bool b) {
 			f = (f & 0b11011111) + (b ? 0b00100000 : 0);
 		}
-		void setFlagsC(bool b) {
+		void setFlagC(bool b) {
 			f = (f & 0b11101111) + (b ? 0b00010000 : 0);
+		}
+		bool getFlagC() {
+			return (f & 0b00010000) != 0;
+		}
+		bool getFlagH() {
+			return (f & 0b00100000) != 0;
+		}
+		bool getFlagN() {
+			return (f & 0b01000000) != 0;
+		}
+		bool getFlagZ() {
+			return (f & 0b10000000) != 0;
 		}
 	};
 	struct Clock {
