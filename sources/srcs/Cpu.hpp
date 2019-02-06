@@ -84,6 +84,20 @@ namespace emulator
 		}
 		void Jr(uint16_t arg) {_register.pc += arg;}
 		void Add_Hl_De(uint16_t) { _register.hl += _register.de; _register.setFlagN(false);}
+		void Ld_A_De(uint16_t) { _register.a = _memory[_register.pc + _register.de];}
+		void Dec_De(uint16_t) {_register.de--;}
+		void Inc_E(uint16_t) {_register.e++;}
+		void Dec_E(uint16_t) {_register.e--;}
+		void Ld_E(uint16_t arg) {_register.e = arg;}
+		void Rra(uint16_t) {
+			auto ci = _register.getFlagC() ? 0b10000000 : 0;
+			auto co = (_register.a & 0b10000000) != 0;
+			_register.a = (_register.a >> 1) + ci;
+			_register.setFlagC(co);
+		}
+
+		/* 0x20 */
+		void Jr_Nz(uint16_t) {}
 
 		void default_operator(uint16_t) {std::cout << "unknown operand: " << managedInstruction[_memory[_register.pc]]._name << std::endl; }
 
