@@ -62,6 +62,19 @@ namespace emulator
 		};
 		unsigned short sp;
 		unsigned short pc;
+
+		void setFlagsZ(bool b) {
+			f = (f & 0b01111111) + (b ? 0b10000000 : 0);
+		}
+		void setFlagsN(bool b) {
+			f = (f & 0b10111111) + (b ? 0b01000000 : 0);
+		}
+		void setFlagsH(bool b) {
+			f = (f & 0b11011111) + (b ? 0b00100000 : 0);
+		}
+		void setFlagsC(bool b) {
+			f = (f & 0b11101111) + (b ? 0b00010000 : 0);
+		}
 	};
 	struct Clock {
 		unsigned char m;

@@ -51,6 +51,10 @@ uint8_t &emulator::Memory::operator[](int addr)
 		return _oam[((unsigned int)addr) & ((unsigned int)0xFF)];
 	else if (addr < 0xFF00)		// unsabel memory
 		return zero;
+	else if (addr < 0xFF40)
+		return zero;
+	else if (addr < 0xFF4C)
+		return _registerGpu[addr];
 	else if (addr < 0xFF80)		// IO register
 		return zero;
 	else if (addr < 0xFFFF)		// zero page

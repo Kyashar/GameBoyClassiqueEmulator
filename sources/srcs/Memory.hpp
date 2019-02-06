@@ -48,7 +48,7 @@ namespace emulator
 		struct GpuRegister {
 			GpuRegister() : gpuControl(0), beginDisplay(0, 0), line(0), bgPalette(0) {}
 			GpuRegister(sf::Vector2u &display, unsigned int &l) : gpuControl(0), beginDisplay(display), line(l), bgPalette(0) {}
-			unsigned int &operator[](size_t address) {
+			unsigned char &operator[](size_t address) {
 				if (address == 0xFF40)
 					return gpuControl;
 				if (address == 0xFF42)
@@ -63,18 +63,18 @@ namespace emulator
 				return bgPalette;
 			}
 
-			const unsigned int &getControl() const {return gpuControl;}
-			const sf::Vector2u &getDisplay() const {return beginDisplay;}
-			const unsigned int &getLine() const {return line;}
-			const unsigned int &getPalette() const {return bgPalette;}
-			unsigned int getPalette(unsigned int index) const  {
-				unsigned int masque = 3;
+			const unsigned char &getControl() const {return gpuControl;}
+			const sf::Vector2<unsigned char> &getDisplay() const {return beginDisplay;}
+			const unsigned char &getLine() const {return line;}
+			const unsigned char &getPalette() const {return bgPalette;}
+			unsigned char getPalette(unsigned int index) const  {
+				unsigned char masque = 3;
 				return bgPalette & (masque << (index * 2));
 			}
 
 			bool background() {return gpuControl & 0b1;}
 			bool sprite() {return gpuControl & 0b10;}
-			sf::Vector2u spriteSize() {return gpuControl & 0b100 ? sf::Vector2u(8, 8) : sf::Vector2u(8, 16);}
+			sf::Vector2<unsigned char> spriteSize() {return gpuControl & 0b100 ? sf::Vector2<unsigned char>(8, 8) : sf::Vector2<unsigned char>(8, 16);}
 			bool bgTileMap() {return gpuControl & 0b1000;}
 			bool bgTileSet() {return gpuControl & 0b10000;}
 			bool window() {return gpuControl & 0b100000;}
@@ -82,16 +82,16 @@ namespace emulator
 			bool display() {return gpuControl & 0b10000000;}
 
 			void setPalette(unsigned int index, unsigned int value) {
-				unsigned int tmp = 0b11111111;
+				unsigned char tmp = 0b11111111;
 				tmp &=
 				bgPalette &= ~(0b11 << (index * 2));
 				bgPalette = (bgPalette | (value << (index * 2)));
 			}
 
-			unsigned int gpuControl;
-			sf::Vector2u beginDisplay;
-			unsigned int line;
-			unsigned int bgPalette;
+			unsigned char gpuControl;
+			sf::Vector2<unsigned char> beginDisplay;
+			unsigned char line;
+			unsigned char bgPalette;
 
 		};
 
