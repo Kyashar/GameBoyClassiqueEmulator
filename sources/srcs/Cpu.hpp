@@ -101,7 +101,7 @@ namespace emulator
 			if (!_register.getFlagN())
 				_register.pc += arg;
 			else
-				_register.m = -4;
+				_register.m = -1;
 		}
 		void Ld_Hl(uint16_t arg) { _register.hl = arg;}
 		void Ld_Hlpp_A(uint16_t) {_register.a = _memory[_register.hl]; _register.hl++;}
@@ -130,7 +130,7 @@ namespace emulator
 			if (_register.getFlagZ())
 				_register.pc += arg;
 			else
-				_register.m = -4;
+				_register.m = -1;
 		}
 		void Add_Hl_Hl(uint16_t) {
 			size_t tmp = _register.hl + _register.hl;
@@ -143,7 +143,7 @@ namespace emulator
 		void Ld_L(uint16_t arg) {_register.l = arg;}
 		void Cpl(uint16_t) {_register.a = ~_register.a; _register.setFlagN(true); _register.setFlagH(true);}
 
-		void Jr_Nc(uint16_t arg) {if (!_register.getFlagC()) _register.pc = _register.pc + arg; else _register.m -= 4;} /* 0x30 */
+		void Jr_Nc(uint16_t arg) {if (!_register.getFlagC()) _register.pc += arg; else _register.m -= 1;} /* 0x30 */
 		void Ld_Sp(uint16_t arg) {_register.sp = arg;}
 		void Ld_Hln_A(uint16_t) {_register.a = _memory[_register.hl]; _register.hl--;}
 		void Inc_Sp(uint16_t) {_register.sp--;}
@@ -183,7 +183,7 @@ namespace emulator
 		void Ld_D_E(uint16_t) {_register.d = _register.e;}
 		void Ld_D_H(uint16_t) {_register.d = _register.h;}
 		void Ld_D_L(uint16_t) {_register.d = _register.l;}
-		void Ld_D_HLp(uint16_t) {_register.d = _memory[_register.hl];;}
+		void Ld_D_HLp(uint16_t) {_register.d = _memory[_register.hl];}
 		void Ld_D_A(uint16_t) {_register.d = _register.a;}
 		void Ld_E_B(uint16_t) {_register.d = _register.b;}
 		void Ld_E_C(uint16_t) {_register.d = _register.c;}
@@ -245,62 +245,71 @@ namespace emulator
 		void Adc_A_HLp(uint16_t) {_register.a += _memory[_register.hl] + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 		void Adc_A_A(uint16_t) {_register.a += _register.a + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 
-		void Sub_B(uint16_t) {} /* 0x90 */
-		void Sub_C(uint16_t) {}
-		void Sub_D(uint16_t) {}
-		void Sub_E(uint16_t) {}
-		void Sub_H(uint16_t) {}
-		void Sub_L(uint16_t) {}
-		void Sub_HLp(uint16_t) {}
-		void Sub_A(uint16_t) {}
-		void Sbc_A_B(uint16_t) {}
-		void Sbc_A_C(uint16_t) {}
-		void Sbc_A_D(uint16_t) {}
-		void Sbc_A_E(uint16_t) {}
-		void Sbc_A_H(uint16_t) {}
-		void Sbc_A_L(uint16_t) {}
-		void Sbc_A_HLp(uint16_t) {}
-		void Sbc_A_A(uint16_t) {}
+		void Sub_B(uint16_t) {_register.a -= _register.b; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);} /* 0x90 */
+		void Sub_C(uint16_t) {_register.a -= _register.c; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Sub_D(uint16_t) {_register.a -= _register.d; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Sub_E(uint16_t) {_register.a -= _register.e; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Sub_H(uint16_t) {_register.a -= _register.h; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Sub_L(uint16_t) {_register.a -= _register.l; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Sub_HLp(uint16_t) {_register.a -= _memory[_register.hl]; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Sub_A(uint16_t) {_register.a -= _register.a; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Sbc_A_B(uint16_t) {_register.setFlagC(_register.a > _register.b); _register.a -= _register.b - _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc_A_C(uint16_t) {_register.setFlagC(_register.a > _register.c); _register.a -= _register.c - _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc_A_D(uint16_t) {_register.setFlagC(_register.a > _register.d); _register.a -= _register.d - _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc_A_E(uint16_t) {_register.setFlagC(_register.a > _register.e); _register.a -= _register.e - _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc_A_H(uint16_t) {_register.setFlagC(_register.a > _register.f); _register.a -= _register.h - _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc_A_L(uint16_t) {_register.setFlagC(_register.a > _register.l); _register.a -= _register.l - _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc_A_HLp(uint16_t) {_register.setFlagC(_register.a > _memory[_register.hl]); _register.a -= _memory[_register.hl] - _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc_A_A(uint16_t) {_register.a -= _register.a - _register.getFlagC(); _register.setFlagZ(true); _register.setFlagN(true);}
 
-		void And_B(uint16_t) {} /* 0xA0 */
-		void And_C(uint16_t) {}
-		void And_D(uint16_t) {}
-		void And_E(uint16_t) {}
-		void And_H(uint16_t) {}
-		void And_L(uint16_t) {}
-		void And_HLp(uint16_t) {}
-		void And_A(uint16_t) {}
-		void Xor_B(uint16_t) {}
-		void Xor_C(uint16_t) {}
-		void Xor_D(uint16_t) {}
-		void Xor_E(uint16_t) {}
-		void Xor_H(uint16_t) {}
-		void Xor_L(uint16_t) {}
-		void Xor_HLp(uint16_t) {}
-		void Xor_A(uint16_t) {}
+		void And_B(uint16_t) {_register.a &= _register.b; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);} /* 0xA0 */
+		void And_C(uint16_t) {_register.a &= _register.c; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void And_D(uint16_t) {_register.a &= _register.d; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void And_E(uint16_t) {_register.a &= _register.e; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void And_H(uint16_t) {_register.a &= _register.h; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void And_L(uint16_t) {_register.a &= _register.l; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void And_HLp(uint16_t) {_register.a &= _memory[_register.hl]; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void And_A(uint16_t) {_register.a &= _register.a; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Xor_B(uint16_t) {_register.a ^= _register.b; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Xor_C(uint16_t) {_register.a ^= _register.c; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Xor_D(uint16_t) {_register.a ^= _register.d; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Xor_E(uint16_t) {_register.a ^= _register.e; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Xor_H(uint16_t) {_register.a ^= _register.h; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Xor_L(uint16_t) {_register.a ^= _register.l; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Xor_HLp(uint16_t) {_register.a ^= _memory[_register.hl]; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Xor_A(uint16_t) {_register.a ^= _register.a; _register.f = 0; _register.setFlagZ(_register.a == 0);}
 
-		void Or_B(uint16_t) {} /* 0xB0 */
-		void Or_C(uint16_t) {}
-		void Or_D(uint16_t) {}
-		void Or_E(uint16_t) {}
-		void Or_H(uint16_t) {}
-		void Or_L(uint16_t) {}
-		void Or_HLp(uint16_t) {}
-		void Or_A(uint16_t) {}
-		void Cp_B(uint16_t) {}
-		void Cp_C(uint16_t) {}
-		void Cp_D(uint16_t) {}
-		void Cp_E(uint16_t) {}
-		void Cp_H(uint16_t) {}
-		void Cp_L(uint16_t) {}
-		void Cp_HLp(uint16_t) {}
-		void Cp_A(uint16_t) {}
+		void Or_B(uint16_t) {_register.a |= _register.b; _register.f = 0; _register.setFlagZ(_register.a == 0);} /* 0xB0 */
+		void Or_C(uint16_t) {_register.a |= _register.c; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Or_D(uint16_t) {_register.a |= _register.d; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Or_E(uint16_t) {_register.a |= _register.e; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Or_H(uint16_t) {_register.a |= _register.h; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Or_L(uint16_t) {_register.a |= _register.l; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Or_HLp(uint16_t) {_register.a |= _memory[_register.hl]; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Or_A(uint16_t) {_register.a |= _register.a; _register.f = 0; _register.setFlagZ(_register.a == 0);}
+		void Cp_B(uint16_t) {_register.setFlagC(_register.b > _register.a); _register.setFlagN(true); _register.setFlagZ(_register.b == _register.a);}
+		void Cp_C(uint16_t) {_register.setFlagC(_register.c > _register.a); _register.setFlagN(true); _register.setFlagZ(_register.c == _register.a);}
+		void Cp_D(uint16_t) {_register.setFlagC(_register.d > _register.a); _register.setFlagN(true); _register.setFlagZ(_register.d == _register.a);}
+		void Cp_E(uint16_t) {_register.setFlagC(_register.e > _register.a); _register.setFlagN(true); _register.setFlagZ(_register.e == _register.a);}
+		void Cp_H(uint16_t) {_register.setFlagC(_register.h > _register.a); _register.setFlagN(true); _register.setFlagZ(_register.h == _register.a);}
+		void Cp_L(uint16_t) {_register.setFlagC(_register.l > _register.a); _register.setFlagN(true); _register.setFlagZ(_register.l == _register.a);}
+		void Cp_HLp(uint16_t) {_register.setFlagC(_memory[_register.hl] > _register.a); _register.setFlagN(true); _register.setFlagZ(_memory[_register.hl] == _register.a);}
+		void Cp_A(uint16_t) {_register.setFlagC(false); _register.setFlagN(true); _register.setFlagZ(true);}
 
-		void Ret_Nz(uint16_t) {} /* 0xC0 */
-		void Pop_Bc(uint16_t) {}
-		void Jp_Nz(uint16_t arg) {}
-		void Jp(uint16_t arg) {}
-		void Call_Nz(uint16_t arg) {}
+		void Ret_Nz(uint16_t) {if (!_register.getFlagZ()) _register.pc = _memory[_register.sp]; else _register.m -= 1;} /* 0xC0 */
+		void Pop_Bc(uint16_t) {_register.bc = _memory.getShort(_register.sp); _register.sp += 2;}
+		void Jp_Nz(uint16_t arg) {if (!_register.getFlagZ()) _register.pc = arg; else _register.m -= 1;}
+		void Jp(uint16_t arg) {_register.pc = arg;}
+		void Call_Nz(uint16_t arg) { _register.m=3;
+			if(!_register.getFlagZ()) {
+				_register.sp -= 2;
+				_memory.setShort(_register.sp, _register.pc + 2);
+				_register.pc= _memory.getShort(_register.pc);
+			} else {
+				_register.pc += 2;
+				_register.m -= 3;
+			}
+		}
 		void Push_Bc(uint16_t) {}
 		void Add_A(uint16_t arg) {}
 		void Rst_00H(uint16_t) {}

@@ -83,7 +83,7 @@ namespace emulator
 
 			void setPalette(unsigned int index, unsigned int value) {
 				unsigned char tmp = 0b11111111;
-				tmp &=
+//				tmp &=
 				bgPalette &= ~(0b11 << (index * 2));
 				bgPalette = (bgPalette | (value << (index * 2)));
 			}
@@ -100,8 +100,8 @@ namespace emulator
 		~Memory() = default;
 
 		void loadRom(std::vector<uint8_t> &data);
-		uint16_t getShort(int index);
 		uint16_t getShort(int index) const;
+		void setShort(int index, uint16_t value);
 
 		const GpuRegister  &getGpuRegister() const {return _registerGpu;}
 		uint8_t &operator[](int index);

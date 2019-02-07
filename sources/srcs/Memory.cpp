@@ -12,15 +12,6 @@ void emulator::Memory::loadRom(std::vector<uint8_t> &data)
 	std::copy(data.begin(), data.end(), _rom.begin());
 }
 
-uint16_t emulator::Memory::getShort(int index)
-{
-	uint16_t first = (*this)[index];
-	uint16_t seconde = (*this)[(index + 1)] << 8;
-
-	uint16_t ret = first + seconde;
-	return ret;
-}
-
 uint16_t emulator::Memory::getShort(int index) const
 {
 	uint16_t first = operator[](index);
@@ -28,6 +19,12 @@ uint16_t emulator::Memory::getShort(int index) const
 
 	uint16_t ret = first + seconde;
 	return ret;
+}
+
+void emulator::Memory::setShort(int index, uint16_t value)
+{
+	operator[](index) =     (value & 0b11111111000000000) >> 8;
+	operator[](index + 1) = (value & 0b00000000111111111);
 }
 
 uint8_t &emulator::Memory::operator[](int addr)
