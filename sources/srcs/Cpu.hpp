@@ -28,7 +28,7 @@ namespace emulator
 		};
 
 		explicit Cpu(std::vector<uint8_t> &instuctions);
-		~Cpu();
+		~Cpu() = default;
 
 		bool gotSomethingToRead() const;
 		/**
@@ -114,7 +114,7 @@ namespace emulator
 			_register.setFlagH(false);
 		}
 		void Jr_Z(uint16_t arg) { if (_register.getFlagZ()) _register.pc += arg; else _register.m = -1;}
-		void Add_Hl_Hl(uint16_t) { size_t tmp = _register.hl + _register.hl; _register.setFlagN(false); }
+		void Add_Hl_Hl(uint16_t) {_register.hl += _register.hl; _register.setFlagN(false);}
 		void Ld_A_Hlpp(uint16_t) {_register.a = _memory[_register.hl];}
 		void Dec_Hl(uint16_t) {_register.hl--;}
 		void Inc_L(uint16_t) {_register.hl++;}
@@ -133,7 +133,7 @@ namespace emulator
 		void Scf(uint16_t arg) {}
 		void Jr_C(uint16_t arg) {if (_register.getFlagC()) _register.pc += arg; else _register.m -= 1;}
 		void Add_Hl_Sp(uint16_t) {_register.hl += _register.sp; _register.setFlagZ(_register.hl == 0); _register.setFlagN(false);}
-		void Ld_A_Hln(uint16_t) {_register.a = _memory[_register.hl]; _register.hl;}
+		void Ld_A_Hln(uint16_t) {_register.a = _memory[_register.hl];}
 		void Dec_Sp(uint16_t) {_register.sp--; _register.setFlagN(false); _register.setFlagZ(_memory[_register.hl] == 0);}
 		void Inc_A(uint16_t) {_register.a++; _register.setFlagN(false); _register.setFlagZ(_memory[_register.hl] == 0);}
 		void Dec_A(uint16_t) {_register.a--; _register.setFlagN(false); _register.setFlagZ(_memory[_register.hl] == 0);}

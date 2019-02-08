@@ -82,7 +82,7 @@ namespace emulator
 			bool display() {return gpuControl & 0b10000000;}
 
 			void setPalette(unsigned int index, unsigned int value) {
-				unsigned char tmp = 0b11111111;
+//				unsigned char tmp = 0b11111111;
 //				tmp &=
 				bgPalette &= ~(0b11 << (index * 2));
 				bgPalette = (bgPalette | (value << (index * 2)));

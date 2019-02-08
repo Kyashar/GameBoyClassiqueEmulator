@@ -19,11 +19,6 @@ emulator::Cpu::Cpu(std::vector<uint8_t> &instructions) :
 	_gpu.initWindow();
 }
 
-emulator::Cpu::~Cpu()
-{
-
-}
-
 bool emulator::Cpu::gotSomethingToRead() const
 {
 	return _read;
