@@ -130,7 +130,7 @@ namespace emulator
 		void Inc_Hlp(uint16_t) {_memory[_register.hl]++; _register.setFlagN(false); _register.setFlagZ(_memory[_register.hl] == 0);}
 		void Dec_Hlp(uint16_t) {_memory[_register.hl]--; _register.setFlagN(false); _register.setFlagZ(_memory[_register.hl] == 0);}
 		void Ld_Hlp(uint16_t arg) {_memory[_register.hl] = arg;}
-		void Scf(uint16_t arg) {}
+		void Scf(uint16_t) {}
 		void Jr_C(uint16_t arg) {if (_register.getFlagC()) _register.pc += arg; else _register.m -= 1;}
 		void Add_Hl_Sp(uint16_t) {_register.hl += _register.sp; _register.setFlagZ(_register.hl == 0); _register.setFlagN(false);}
 		void Ld_A_Hln(uint16_t) {_register.a = _memory[_register.hl];}
@@ -341,8 +341,8 @@ namespace emulator
 		/* 0xF0 */
 		void Ldh_a_A(uint16_t) {_memory[_register.hl] = _register.a;} /* 0xF0 */
 		void Pop_Af(uint16_t) {_register.af = this->popStack();}
-		void Ld_A_Cp(uint16_t arg) {_register.a = _memory[_register.c];}
-		void Di(uint16_t arg) {} /* disable interrupt */
+		void Ld_A_Cp(uint16_t) {_register.a = _memory[_register.c];}
+		void Di(uint16_t) {} /* disable interrupt */
 //		void Call_Nz(uint16_t arg) {}
 		void Push_Af(uint16_t) {this->pushStack(_register.af);}
 		void Or(uint16_t arg) {_register.a |= arg; _register.f = 0; _register.setFlagZ(_register.a == 0);}
@@ -353,7 +353,7 @@ namespace emulator
 		void Ei(uint16_t) {} /* enable interupt */
 //		void Call_Z(uint16_t) {}
 //		void Call(uint16_t arg) {}
-		void Cp(uint16_t arg) {auto elem = _register.a - arg;}
+		void Cp(uint16_t arg) {_register.setFlagZ(_register.a == arg); _register.setFlagN(true); _register.setFlagH(false); _register.setFlagC(arg > _register.a);}
 		void Rst_38H(uint16_t) {}
 
 		void default_operator(uint16_t) {std::cout << "unknown operand: " << managedInstruction[_memory[_register.pc]]._name << std::endl; exit(1);}
