@@ -262,7 +262,8 @@ namespace emulator
 		void Ld_Hlp(uint16_t arg) {_memory[_register.hl] = arg;}
 
 		void Ldh_a_A(uint16_t) {_memory[_register.hl] = _register.a;}
-		void Ldh_A(uint16_t arg) {_memory[arg] = _register.a;}
+		void Ldh_A_a(uint16_t arg) {_memory[arg] = _register.a;}
+
 		void Ld_A_p(uint16_t arg) {_register.a = _memory[arg];}
 		void Ld_a_A(uint16_t arg) {_memory[arg] = _register.a;}
 		void Ld_A(uint16_t arg) {_register.a = arg;}
@@ -280,8 +281,8 @@ namespace emulator
 		void Ld_A_Hlpp(uint16_t) {_register.a = _memory[_register.hl];}
 		void Ld_A_Hlp(uint16_t) {_register.a = _memory[_register.hl] ;}
 
-		void Ld_B(uint16_t) {_register.b = _memory[_register.pc];};
-		void Ld_B_B(uint16_t) {_register.b = _register.b;} /* 0x40 */
+		void Ld_B(uint16_t)   {_register.b = _memory[_register.pc];};
+		void Ld_B_B(uint16_t) {_register.b = _register.b;}
 		void Ld_B_C(uint16_t) {_register.b = _register.c;}
 		void Ld_B_D(uint16_t) {_register.b = _register.d;}
 		void Ld_B_E(uint16_t) {_register.b = _register.e;}
@@ -301,7 +302,7 @@ namespace emulator
 		void Ld_C_A(uint16_t) {_register.c = _register.a;}
 
 		void Ld_D(uint16_t arg) {_register.e = arg;}
-		void Ld_D_B(uint16_t) {_register.d = _register.b;} /* 0x50 */
+		void Ld_D_B(uint16_t) {_register.d = _register.b;}
 		void Ld_D_C(uint16_t) {_register.d = _register.c;}
 		void Ld_D_D(uint16_t) {_register.d = _register.d;}
 		void Ld_D_E(uint16_t) {_register.d = _register.e;}
@@ -321,7 +322,7 @@ namespace emulator
 		void Ld_E_A(uint16_t) {_register.d = _register.a;}
 
 		void Ld_H(uint16_t arg) {_register.h = arg;}
-		void Ld_H_B(uint16_t) {_register.h = _register.b;} /* 0x60 */
+		void Ld_H_B(uint16_t) {_register.h = _register.b;}
 		void Ld_H_C(uint16_t) {_register.h = _register.c;}
 		void Ld_H_D(uint16_t) {_register.h = _register.d;}
 		void Ld_H_E(uint16_t) {_register.h = _register.e;}
@@ -331,16 +332,16 @@ namespace emulator
 		void Ld_H_A(uint16_t) {_register.h = _register.a;}
 
 
-		void Ld_L_B(uint16_t) {_register.l = _register.b;}
-		void Ld_L_C(uint16_t) {_register.l = _register.c;}
-		void Ld_L_D(uint16_t) {_register.l = _register.d;}
-		void Ld_L_E(uint16_t) {_register.l = _register.e;}
-		void Ld_L_H(uint16_t) {_register.l = _register.h;}
-		void Ld_L_L(uint16_t) {_register.l = _register.l;}
+		void Ld_L_B(uint16_t)   {_register.l = _register.b;}
+		void Ld_L_C(uint16_t)   {_register.l = _register.c;}
+		void Ld_L_D(uint16_t)   {_register.l = _register.d;}
+		void Ld_L_E(uint16_t)   {_register.l = _register.e;}
+		void Ld_L_H(uint16_t)   {_register.l = _register.h;}
+		void Ld_L_L(uint16_t)   {_register.l = _register.l;}
 		void Ld_L_Hlp(uint16_t) {_register.l = _memory[_register.hl];}
-		void Ld_L_A(uint16_t) {_register.l = _register.a;}
+		void Ld_L_A(uint16_t)   {_register.l = _register.a;}
 
-		void Ld_Hlp_B(uint16_t) {_memory[_register.hl] = _register.b;} /* 0x70 */
+		void Ld_Hlp_B(uint16_t) {_memory[_register.hl] = _register.b;}
 		void Ld_Hlp_C(uint16_t) {_memory[_register.hl] = _register.c;}
 		void Ld_Hlp_D(uint16_t) {_memory[_register.hl] = _register.d;}
 		void Ld_Hlp_E(uint16_t) {_memory[_register.hl] = _register.e;}

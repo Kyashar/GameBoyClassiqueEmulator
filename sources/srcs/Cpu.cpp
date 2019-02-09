@@ -292,7 +292,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"SBC  A, d8", 2, &Cpu::Sbc, 2},
 	{"RST 18H", 1, &Cpu::Rst_18H, 3},
 
-	{"LDH a8, A", 2, &Cpu::Ldh_A, 3}, /* 0xE0 */
+	{"LDH (a8), A", 2, &Cpu::Ldh_a_A, 3}, /* 0xE0 */
 	{"POP HL", 1, &Cpu::Pop_Hl, 3},
 	{"LD (C), A", 1, &Cpu::Ld_Cp, 2},
 	{"NOT IMPLEMENTED", 1, &Cpu::default_operator, 1},
@@ -302,14 +302,14 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"RST 20H", 1, &Cpu::Rst_20H, 4},
 	{"ADD SP, r8", 2, &Cpu::Add_SP, 4},
 	{"JP (HL)", 1, &Cpu::Jp_Hlp, 1},
-	{"LD (a16), A", 3, &Cpu::Ld_A, 4},
+	{"LD (a16), A", 3, &Cpu::Ld_a_A, 4},
 	{"NOT IMPLEMENTED", 1, &Cpu::default_operator, 1},
 	{"NOT IMPLEMENTED", 1, &Cpu::default_operator, 1},
 	{"NOT IMPLEMENTED", 1, &Cpu::default_operator, 1},
 	{"XOR  d8", 2, &Cpu::Xor, 2},
 	{"RST 28H", 1, &Cpu::Rst_28H, 4},
 
-	{"LDH a8, A", 2, &Cpu::Ldh_a_A, 3}, /* 0xF0 */
+	{"LDH A, (a8)", 2, &Cpu::Ldh_A_a, 3}, /* 0xF0 */
 	{"POP AF", 1, &Cpu::Pop_Af, 3},
 	{"LD A, (C)", 1, &Cpu::Ld_A_Cp, 2},
 	{"DI", 1, &Cpu::Di, 1},
@@ -319,7 +319,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"RST 30H", 1, &Cpu::Rst_30H, 4},
 	{"LD HL, SP+r8", 2, &Cpu::Ld_HL_SP, 3},
 	{"LD SP, HL", 1, &Cpu::Ld_Sp_Hl, 2},
-	{"LD A, (a16)", 3, &Cpu::Ld_A, 4},
+	{"LD A, (a16)", 3, &Cpu::Ld_A_p, 4},
 	{"EI", 1, &Cpu::Ei, 1},
 	{"NOT IMPLEMENTED", 1, &Cpu::default_operator, 1},
 	{"NOT IMPLEMENTED", 1, &Cpu::default_operator, 1},
