@@ -3,6 +3,7 @@ roms/
 build/
 CMakeFiles/
 CMakeCache.txt
+*.test
 ##          							GITHUB GITIGNORE
 # Prerequisites
 *.d
