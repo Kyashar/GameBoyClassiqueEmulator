@@ -8,6 +8,8 @@
 #ifndef EMULATOR_GAMEBOY_REGISTER_HPP
 #define EMULATOR_GAMEBOY_REGISTER_HPP
 
+#include <ostream>
+
 namespace emulator
 {
 	struct Register {
@@ -93,5 +95,7 @@ namespace emulator
 		unsigned char t;
 	};
 }
+
+std::ostream &operator<<(std::ostream &os, emulator::Register &reg);
 
 #endif //EMULATOR_GAMEBOY_REGISTER_HPP

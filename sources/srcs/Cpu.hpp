@@ -37,6 +37,15 @@ namespace emulator
 		void readInstruction();
 
 	private:
+		static std::vector<instructionInfos> managedInstruction;
+		Register _register;
+		Clock _timer;
+		Memory _memory;
+		gfx::Screen _gpu;
+
+		size_t _romSize;
+		bool _read;
+
 		void pushStack(uint16_t arg) {
 			_register.sp -= 2;
 			_memory[_register.sp] =     (0b1111111100000000 & arg);
@@ -150,7 +159,7 @@ namespace emulator
 		void Adc(uint16_t arg) {_register.a += arg + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 
 		void Sub(uint16_t arg) {_register.setFlagC(arg > _register.a)        ; _register.a -= arg        ; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
-		void Sub_A(uint16_t)   {_register.setFlagC(_register.a > _register.a); _register.a -= _register.a; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sub_A(uint16_t)   {_register.setFlagC(false); _register.a -= _register.a; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sub_B(uint16_t)   {_register.setFlagC(_register.b > _register.a); _register.a -= _register.b; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sub_C(uint16_t)   {_register.setFlagC(_register.c > _register.a); _register.a -= _register.c; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sub_D(uint16_t)   {_register.setFlagC(_register.d > _register.a); _register.a -= _register.d; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
@@ -159,8 +168,8 @@ namespace emulator
 		void Sub_L(uint16_t)   {_register.setFlagC(_register.l > _register.a); _register.a -= _register.l; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sub_Hlp(uint16_t) {_register.setFlagC(_memory[_register.hl] > _register.a); _register.a -= _memory[_register.hl]; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 
-		void Sbc(uint16_t arg) {auto res = _register.getFlagC(); _register.setFlagC(_register.a > _register.a); _register.a -= arg - res; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
-		void Sbc_A_A(uint16_t) {auto res = _register.getFlagC(); _register.setFlagC(_register.a > _register.a); _register.a -= _register.a - res; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc(uint16_t arg) {auto res = _register.getFlagC(); _register.setFlagC(false); _register.a -= arg - res; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sbc_A_A(uint16_t) {auto res = _register.getFlagC(); _register.setFlagC(false); _register.a -= _register.a - res; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sbc_A_B(uint16_t) {auto res = _register.getFlagC(); _register.setFlagC(_register.b > _register.a); _register.a -= _register.b - res; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sbc_A_C(uint16_t) {auto res = _register.getFlagC(); _register.setFlagC(_register.c > _register.a); _register.a -= _register.c - res; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sbc_A_D(uint16_t) {auto res = _register.getFlagC(); _register.setFlagC(_register.d > _register.a); _register.a -= _register.d - res; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
@@ -261,25 +270,25 @@ namespace emulator
 		void Ld_Hln_A(uint16_t) {_register.a = _memory[_register.hl]; _register.hl--;}
 		void Ld_Hlp(uint16_t arg) {_memory[_register.hl] = arg;}
 
-		void Ldh_a_A(uint16_t) {_memory[_register.hl] = _register.a;}
-		void Ldh_A_a(uint16_t arg) {_memory[arg] = _register.a;}
+		void Ldh_a_A(uint16_t arg) {_memory[arg] = _register.a;}// arg + FF00 (I/) ports)
+		void Ldh_A_a(uint16_t arg) {_register.a = _memory[arg];}// arg + FF00 (I/) ports)
 
 		void Ld_A_p(uint16_t arg) {_register.a = _memory[arg];}
 		void Ld_a_A(uint16_t arg) {_memory[arg] = _register.a;}
 		void Ld_A(uint16_t arg) {_register.a = arg;}
-		void Ld_A_A(uint16_t) {_register.a = _register.a ;}
-		void Ld_A_B(uint16_t) {_register.a = _register.b ;}
-		void Ld_A_C(uint16_t) {_register.a = _register.c ;}
-		void Ld_A_D(uint16_t) {_register.a = _register.d ;}
-		void Ld_A_E(uint16_t) {_register.a = _register.e ;}
-		void Ld_A_H(uint16_t) {_register.a = _register.h ;}
-		void Ld_A_L(uint16_t) {_register.a = _register.l ;}
-		void Ld_A_Cp(uint16_t) {_register.a = _memory[_register.c];}
+		void Ld_A_A(uint16_t) {_register.a = _register.a;}
+		void Ld_A_B(uint16_t) {_register.a = _register.b;}
+		void Ld_A_C(uint16_t) {_register.a = _register.c;}
+		void Ld_A_D(uint16_t) {_register.a = _register.d;}
+		void Ld_A_E(uint16_t) {_register.a = _register.e;}
+		void Ld_A_H(uint16_t) {_register.a = _register.h;}
+		void Ld_A_L(uint16_t) {_register.a = _register.l;}
+		void Ld_A_Cp(uint16_t) {_register.a = _memory[_register.c];} // c + FF00 (I/) ports)
 		void Ld_A_BC(uint16_t) {_register.a = _memory[_register.pc + _register.bc];}
 		void Ld_A_De(uint16_t) { _register.a = _memory[_register.pc + _register.de];}
-		void Ld_A_Hln(uint16_t) {_register.a = _memory[_register.hl];}
-		void Ld_A_Hlpp(uint16_t) {_register.a = _memory[_register.hl];}
-		void Ld_A_Hlp(uint16_t) {_register.a = _memory[_register.hl] ;}
+		void Ld_A_Hln(uint16_t) {_register.a = _memory[_register.hl]; _register.hl--;}
+		void Ld_A_Hlpp(uint16_t) {_register.a = _memory[_register.hl]; _register.hl++;}
+		void Ld_A_Hlp(uint16_t) {_register.a = _memory[_register.hl];}
 
 		void Ld_B(uint16_t)   {_register.b = _memory[_register.pc];};
 		void Ld_B_B(uint16_t) {_register.b = _register.b;}
@@ -350,15 +359,6 @@ namespace emulator
 		void Ld_Hlp_A(uint16_t) {_memory[_register.hl] = _register.a;}
 
 		void default_operator(uint16_t) {std::cout << "unknown operand: " << managedInstruction[_memory[_register.pc]]._name << std::endl; exit(1);}
-
-		static std::vector<instructionInfos> managedInstruction;
-		Register _register;
-		Clock _timer;
-		Memory _memory;
-		gfx::Screen _gpu;
-
-		size_t _romSize;
-		bool _read;
 	};
 }
 
