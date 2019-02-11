@@ -8,7 +8,7 @@
 #include "Screen.hpp"
 
 gfx::Screen::Screen(emulator::Memory &mem) :
-	_memory(mem), _bgMap(false), _line(0), _clock(0), _mode(0), _beginDisplay(0, 0)
+	_memory(mem), _clock(0), _mode(0)
 {
 	sf::Vector2f pos = {0, 1};
 
@@ -53,7 +53,7 @@ void gfx::Screen::resetScreen()
  */
 void gfx::Screen::put(size_t timer)
 {
-	_clock +=  timer;
+	_clock += timer;
 
 	if (_mode == 0)
 		Hblank();
@@ -73,10 +73,11 @@ void gfx::Screen::Hblank()
 {
 	if (_clock <= 204)
 		return ;
-	_line++;
+	auto &line = _memory.getGpuRegister().getLine();
+	line++;
 	_clock = 0;
 
-	if (_line == 143) {
+	if (line == 143) {
 		_mode = 1;
 		_window->clear(sf::Color::Red);
 		_window->draw(_pixels.data(), _pixels.size(), sf::Points);
@@ -95,10 +96,10 @@ void gfx::Screen::Vblank()
 	if (_clock <= 456)
 		return ;
 	_mode = 0;
-	_line++;
-	if (_line > 153) {
+	_memory.getGpuRegister().getLine()++;
+	if (_memory.getGpuRegister().getLine() > 153) {
 		_mode = 2;
-		_line = 0;
+		_memory.getGpuRegister().getLine() = 0;
 	}
 }
 
@@ -112,7 +113,7 @@ void gfx::Screen::ObjectRead()
 
 int gfx::Screen::getAddressFromTile(int tileNb)
 {
-	if (!_bgTile)
+	if (!_memory.getGpuRegister().bgTileMap())
 		tileNb += 256;
 
 	return 0x8000 + tileNb * 2;
@@ -124,21 +125,24 @@ void gfx::Screen::renderLine()
 		return ;
 
 	size_t tileNumber;
-	int addr = _bgMap ? 0x9C00 : 0x9800;
-	auto lineoffs = (_beginDisplay.x / 8);
+	int addr = _memory.getGpuRegister().bgTileMap() ? 0x9C00 : 0x9800;
+	auto lineoffs = (_memory.getGpuRegister().getDisplay().x / 8);
 	unsigned char bit;
 	_clock = 0;
 	_mode = 0;
 
 	// Which line of tiles to use in the map
-	addr += (_line + _beginDisplay.y) / 8;
+	addr += (_memory.getGpuRegister().getLine() + _memory.getGpuRegister().getDisplay().y) / 8;
 
 	// get addr from tile for line and index
 	for (size_t i = 0; i < 160;) {
 		bit = 1;
 		tileNumber = _memory[addr + lineoffs + i / 8];
 		do {
-			(*this)[_line][i].color = getColorFromAddress(getAddressFromTile(tileNumber), bit);
+			std::cout << _memory.getGpuRegister().getLine() * 160 << std::endl;
+			if (_memory.getGpuRegister().getLine() * 160 + i < 23040)
+				(*this)[_memory.getGpuRegister().getLine()][i].color = getColorFromAddress(getAddressFromTile(tileNumber), bit);
+			std::cout << std::dec << (int)bit << std::endl;
 			bit <<= 1;
 			i++;
 		} while ((i % 8) != 0 && i < 160);

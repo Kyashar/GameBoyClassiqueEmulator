@@ -60,9 +60,11 @@ void rom::Reader::readHeader()
 	_file.read(reinterpret_cast<char *>(&_romInfos), sizeof(_romInfos));
 	std::cout << _romInfos << std::endl;
 
-	std::cout << "size " << std::to_string(getRomSize()) << std::endl;
+	_file.clear();
+	_file.seekg(0, std::ios::beg);
 	std::vector<unsigned char> buff(std::istreambuf_iterator<char>(_file), {});
-	_fileContent = buff;
+	_fileContent.resize(buff.size());
+	std::copy(buff.begin(), buff.end(), _fileContent.begin());
 }
 
 size_t rom::Reader::getRomSize()

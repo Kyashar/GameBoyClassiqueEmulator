@@ -248,18 +248,18 @@ namespace emulator
 		void Jp_Z(uint16_t arg)  {if (_register.getFlagZ())  _register.pc = arg; else _register.m -= 1;}
 		void Jp_c(uint16_t arg)  {if (_register.getFlagC())  _register.pc = arg; else _register.m -= 1;}
 
-		void Jr(uint16_t arg)    {_register.pc += arg;}
-		void Jr_Nz(uint16_t arg) {if (!_register.getFlagN()) _register.pc += arg; else _register.m -= 1;}
-		void Jr_Nc(uint16_t arg) {if (!_register.getFlagC()) _register.pc += arg; else _register.m -= 1;}
-		void Jr_Z(uint16_t arg)  {if (_register.getFlagZ())  _register.pc += arg; else _register.m -= 1;}
-		void Jr_C(uint16_t arg)  {if (_register.getFlagC())  _register.pc += arg; else _register.m -= 1;}
+		void Jr(uint16_t arg)    {_register.pc += (int8_t)arg;}
+		void Jr_Nz(uint16_t arg) {if (!_register.getFlagZ()) _register.pc += (int8_t)arg; else _register.m -= 1;}
+		void Jr_Nc(uint16_t arg) {if (!_register.getFlagC()) _register.pc += (int8_t)arg; else _register.m -= 1;}
+		void Jr_Z(uint16_t arg)  {if (_register.getFlagZ())  _register.pc += (int8_t)arg; else _register.m -= 1;}
+		void Jr_C(uint16_t arg)  {if (_register.getFlagC())  _register.pc += (int8_t)arg; else _register.m -= 1;}
 
 		void Ld_SP(uint16_t arg) {_memory[_register.pc + arg] = _register.sp;}
 		void Ld_BC(uint16_t arg) {_register.bc = arg;}
 		void Ld_BC_A(uint16_t) {_memory[_register.pc + _register.bc] = _register.a;}
 		void Ld_DE(uint16_t arg) {_register.de = arg;}
 		void Ld_DE_A(uint16_t) {_memory[_register.pc + _register.de] = _register.a;}
-		void Ld_Hlpp_A(uint16_t) {_register.a = _memory[_register.hl]; _register.hl++;}
+		void Ld_Hlpp_A(uint16_t) {_memory[_register.hl] = _register.a; _register.hl++;}
 		void Ld_HL_SP(uint16_t arg) {size_t res = _register.sp + arg; _register.hl = res & 255; _register.setFlagZ(false); _register.setFlagN(false);}
 		void Ld_Sp_Hl(uint16_t) {_register.sp = _register.hl;}
 		void Ld_Cp(uint16_t arg) {_memory[_register.c] = arg;}
@@ -267,7 +267,7 @@ namespace emulator
 		void Ld_L(uint16_t arg) {_register.l = arg;}
 		void Ld_Sp(uint16_t arg) {_register.sp = arg;}
 		void Ld_Hl(uint16_t arg) { _register.hl = arg;}
-		void Ld_Hln_A(uint16_t) {_register.a = _memory[_register.hl]; _register.hl--;}
+		void Ld_Hln_A(uint16_t) {_memory[_register.hl] = _register.a; _register.hl--;}
 		void Ld_Hlp(uint16_t arg) {_memory[_register.hl] = arg;}
 
 		void Ldh_a_A(uint16_t arg) {_memory[arg] = _register.a;}// arg + FF00 (I/) ports)

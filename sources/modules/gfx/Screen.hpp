@@ -35,7 +35,7 @@ namespace gfx {
 		~Screen() = default;
 
 		ScreenLine operator[](size_t height) {
-			return {_pixels, height};
+			return ScreenLine(_pixels, height);
 		}
 		void initWindow();
 		void put(size_t timer);
@@ -55,16 +55,8 @@ namespace gfx {
 		emulator::Memory &_memory;
 		std::array<sf::Vertex, 23040> _pixels;
 
-		bool _bgMap;
-		bool _bgTile;
-
-		size_t _line;
 		size_t _clock;
 		char _mode;
-		/**
-		 *  @location: SCROLLX, SCROOLY register
-		 */
-		sf::Vector2u _beginDisplay;
 	};
 }
 

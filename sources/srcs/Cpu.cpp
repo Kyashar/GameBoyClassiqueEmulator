@@ -5,6 +5,7 @@
 **      Made on 2019/01 by ebernard
 */
 
+#include <iomanip>
 #include <iostream>
 #include "Cpu.hpp"
 
@@ -29,23 +30,29 @@ void emulator::Cpu::readInstruction()
 {
 	uint8_t cData = 0;
   	uint16_t sData = 0;
+  	auto tmp = _register.pc;
 
+  	_register.m = 0;
 	if (managedInstruction[_memory[_register.pc]]._length == 2) {
-		cData = *((unsigned char *) (&_memory[_register.pc]));
+		cData = _memory[_register.pc + 1];
 		sData = cData;
-
 	} else if (managedInstruction[_memory[_register.pc]]._length == 3)
-		sData = _memory.getShort(_register.pc);
+		sData = _memory.getShort(_register.pc + 1);
 
+	std::cout << managedInstruction[_memory[_register.pc]]._name << std::endl;
+	_register.t += managedInstruction[_memory[_register.pc]]._timer;
+	_register.m = _register.t * 4;
 	(*this.*managedInstruction[_memory[_register.pc]]._instruction)(sData);
 
-	_register.t = managedInstruction[_memory[_register.pc]]._timer;
-	_register.m = _register.t * 4;
+	if (tmp == _register.pc)
+		_register.pc += managedInstruction[_memory[_register.pc]]._length;
+	else {
+		_register.pc += managedInstruction[_memory[_register.pc]]._length;
+		std::cout << std::endl << "tmp :" << tmp << ", pc: "
+			  << _register.pc << std::endl << std::endl;
+	}
 
-	_register.pc += managedInstruction[_memory[_register.pc]]._length;
-	if (_register.pc > _romSize)
-		exit(1);
-//	_gpu.put(managedInstruction[_memory[_register.pc]]._timer);
+	_gpu.put(_register.t);
 }
 
 std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos &infos)

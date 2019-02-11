@@ -62,12 +62,11 @@ namespace emulator
 				std::cout << "ERROR" << std::endl;
 				return bgPalette;
 			}
-
-			const unsigned char &getControl() const {return gpuControl;}
-			const sf::Vector2<unsigned char> &getDisplay() const {return beginDisplay;}
-			const unsigned char &getLine() const {return line;}
-			const unsigned char &getPalette() const {return bgPalette;}
-			unsigned char getPalette(unsigned int index) const  {
+			unsigned char &getControl() {return gpuControl;}
+			sf::Vector2<unsigned char> &getDisplay() {return beginDisplay;}
+			unsigned char &getLine() {return line;}
+			unsigned char &getPalette() {return bgPalette;}
+			unsigned char getPalette(unsigned int index) {
 				unsigned char masque = 3;
 				return bgPalette & (masque << (index * 2));
 			}
@@ -100,12 +99,12 @@ namespace emulator
 		~Memory() = default;
 
 		void loadRom(std::vector<uint8_t> &data);
-		uint16_t getShort(int index) const;
+		uint16_t getShort(int index);
 		void setShort(int index, uint16_t value);
 
-		const GpuRegister  &getGpuRegister() const {return _registerGpu;}
+		GpuRegister  &getGpuRegister() {return _registerGpu;}
 		uint8_t &operator[](int index);
-		const uint8_t &operator[](int index) const;
+//		const uint8_t &operator[](int index) const;
 	private:
 //		std::array<uint8_t , 65536> _memory;
 
