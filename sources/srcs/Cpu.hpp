@@ -66,20 +66,20 @@ namespace emulator
 		void Rst_10H(uint16_t) {} /* call reset vector oO  function rsv() */
 		void Rst_18H(uint16_t) {} /* call reset vector oO  function rsv() */
 		void Rst_20H(uint16_t) {} /* call reset vector oO  function rsv() */
-		void Rst_28H(uint16_t) {}
-		void Rst_30H(uint16_t) {}
-		void Rst_38H(uint16_t) {}
+		void Rst_28H(uint16_t) {} /* call reset vector oO  function rsv() */
+		void Rst_30H(uint16_t) {} /* call reset vector oO  function rsv() */
+		void Rst_38H(uint16_t) {} /* call reset vector oO  function rsv() */
 
-		void Ei(uint16_t) {} /* enable interupt */
-		void Reti(uint16_t) {} /* enable sub routine */
-		void Di(uint16_t) {} /* disable interrupt */
-		void Prefix_Cb(uint16_t) {} /* Call Prefix CB */
+		void Ei(uint16_t) {}         /* enable interupt */
+		void Reti(uint16_t) {}       /* enable sub routine */
+		void Di(uint16_t) {}         /* disable interrupt */
+		void Prefix_Cb(uint16_t) {}  /* Call Prefix CB */
 
 		void Cpl(uint16_t) {_register.a = ~_register.a; _register.setFlagN(true); _register.setFlagH(true);}
 		void Scf(uint16_t) {}
 		void Ccf(uint16_t) {}
 
-		void Nop(uint16_t) {std::cout << "DO nothing" << std::endl;}
+		void Nop(uint16_t) {}//std::cout << "DO nothing" << std::endl;}
 		void Stop(uint16_t arg) { std::cout << "STOP: " << arg << std::endl << "enter slow mode, what to do ?" << arg << std::endl;}
 		void Halt(uint16_t) {std::cout << "enter cpu lower mode" << std::endl;}
 

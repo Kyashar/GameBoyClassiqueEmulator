@@ -71,7 +71,7 @@ void gfx::Screen::put(size_t timer)
  */
 void gfx::Screen::Hblank()
 {
-	if (_clock <= 204)
+	if (_clock < 204)
 		return ;
 	auto &line = _memory.getGpuRegister().getLine();
 	line++;
@@ -89,13 +89,14 @@ void gfx::Screen::Hblank()
 
 
 /**
- * emulate gpu timer for vertical blank line.
+ * emulate gpu timer for vertical blank line. (10 lines)
  */
 void gfx::Screen::Vblank()
 {
-	if (_clock <= 456)
+	if (_clock < 456)
 		return ;
-	_mode = 0;
+	_mode = 1;
+	_clock = 0;
 	_memory.getGpuRegister().getLine()++;
 	if (_memory.getGpuRegister().getLine() > 153) {
 		_mode = 2;
@@ -105,23 +106,15 @@ void gfx::Screen::Vblank()
 
 void gfx::Screen::ObjectRead()
 {
-	if (_clock <= 80)
+	if (_clock < 80)
 		return ;
 	_clock = 0;
 	_mode = 3;
 }
 
-int gfx::Screen::getAddressFromTile(int tileNb)
-{
-	if (!_memory.getGpuRegister().bgTileMap())
-		tileNb += 256;
-
-	return 0x8000 + tileNb * 2;
-}
-
 void gfx::Screen::renderLine()
 {
-	if (_clock <= 172)
+	if (_clock < 172)
 		return ;
 
 	size_t tileNumber;
@@ -139,14 +132,22 @@ void gfx::Screen::renderLine()
 		bit = 1;
 		tileNumber = _memory[addr + lineoffs + i / 8];
 		do {
-			std::cout << _memory.getGpuRegister().getLine() * 160 << std::endl;
-			if (_memory.getGpuRegister().getLine() * 160 + i < 23040)
-				(*this)[_memory.getGpuRegister().getLine()][i].color = getColorFromAddress(getAddressFromTile(tileNumber), bit);
-			std::cout << std::dec << (int)bit << std::endl;
+//			std::cout << _memory.getGpuRegister().getLine() * 160 << std::endl;
+//			if (_memory.getGpuRegister().getLine() * 160 + i < 23040)
+//			std::cout << tileNumber << std::endl;
+			(*this)[_memory.getGpuRegister().getLine()][i].color = getColorFromAddress(getAddressFromTile(tileNumber, _memory.getGpuRegister().getLine()), bit);
 			bit <<= 1;
 			i++;
 		} while ((i % 8) != 0 && i < 160);
 	}
+}
+
+int gfx::Screen::getAddressFromTile(int tileNb, int line)
+{
+	if (!_memory.getGpuRegister().bgTileSet())
+		tileNb += 256;
+
+	return 0x8000 + (tileNb * 2 * 8) + (line % 8) * 2;
 }
 
 sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit)

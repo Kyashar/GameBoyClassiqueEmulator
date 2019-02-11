@@ -45,7 +45,7 @@ namespace gfx {
 		void Vblank();
 		void ObjectRead();
 		void renderLine();
-		int getAddressFromTile(int tileNB);
+		int getAddressFromTile(int tileNB, int line);
 
 //		void setSpriteSet();
 		sf::Color getColorFromAddress(int value, unsigned char bit);

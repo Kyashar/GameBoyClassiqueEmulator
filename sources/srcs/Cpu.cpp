@@ -39,7 +39,8 @@ void emulator::Cpu::readInstruction()
 	} else if (managedInstruction[_memory[_register.pc]]._length == 3)
 		sData = _memory.getShort(_register.pc + 1);
 
-	std::cout << managedInstruction[_memory[_register.pc]]._name << std::endl;
+	if (_memory[_register.pc] != 0)
+		std::cout << managedInstruction[_memory[_register.pc]]._name << std::endl;
 	_register.t += managedInstruction[_memory[_register.pc]]._timer;
 	_register.m = _register.t * 4;
 	(*this.*managedInstruction[_memory[_register.pc]]._instruction)(sData);

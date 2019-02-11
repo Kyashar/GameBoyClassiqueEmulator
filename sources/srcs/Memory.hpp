@@ -51,12 +51,18 @@ namespace emulator
 			unsigned char &operator[](size_t address) {
 				if (address == 0xFF40)
 					return gpuControl;
+				if (address == 0xFF41)
+					return gpuStatus;
 				if (address == 0xFF42)
 					return beginDisplay.y;
 				if (address == 0xFF43)
 					return beginDisplay.x;
 				if (address == 0xFF44)
 					return line;
+				/*
+				 * if (address == 0xff45)
+				 * 	CMPLINE
+				 */
 				if (address == 0xFF47)
 					return bgPalette;
 				std::cout << "ERROR" << std::endl;
@@ -81,13 +87,12 @@ namespace emulator
 			bool display() {return gpuControl & 0b10000000;}
 
 			void setPalette(unsigned int index, unsigned int value) {
-//				unsigned char tmp = 0b11111111;
-//				tmp &=
 				bgPalette &= ~(0b11 << (index * 2));
 				bgPalette = (bgPalette | (value << (index * 2)));
 			}
 
 			unsigned char gpuControl;
+			unsigned char gpuStatus;
 			sf::Vector2<unsigned char> beginDisplay;
 			unsigned char line;
 			unsigned char bgPalette;
