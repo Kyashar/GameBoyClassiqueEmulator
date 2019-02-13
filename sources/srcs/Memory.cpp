@@ -73,14 +73,15 @@ uint8_t &emulator::Memory::operator[](int addr)
 		throw std::runtime_error("not mapped address");
 
 
-	if (addr <= 0x100 && !_biosReaded) {        // BIOS
-		if (addr == 0x100) {
-			_biosReaded = true;
-			exit(84);
-			return _rom[addr];
+	if (addr <= 0x0100) {        // BIOS
+		if (!_biosReaded) {
+			if (addr < 0x0100) {
+				return _bios[addr];
+			} else {
+				_biosReaded = true;
+			}
 		}
-		else
-			return _bios[addr];
+		return _rom[addr];
 	}
 	else if (addr < 0x8000) {        // ROM
 		return _rom[addr];

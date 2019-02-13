@@ -58,8 +58,9 @@ namespace emulator
 					return beginDisplay.y;
 				if (address == 0xFF43)
 					return beginDisplay.x;
-				if (address == 0xFF44)
-					return line;
+				if (address == 0xFF44) {
+					return (line >= 0x90) ? o: line;
+				}
 				if (address == 0xFF45)
 				 	return cmpline;
 				if (address == 0xFF47)
@@ -97,7 +98,7 @@ namespace emulator
 			unsigned char cmpline;
 			unsigned char bgPalette;
 			unsigned char zero;
-
+			unsigned char o = 0x90;
 		};
 
 		Memory();

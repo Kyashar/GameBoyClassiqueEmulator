@@ -81,9 +81,9 @@ void gfx::Screen::Hblank()
 
 	if (line == 143) {
 		_mode = 1;
-//		_window->clear(sf::Color::Red);
-//		_window->draw(_pixels.data(), _pixels.size(), sf::Points);
-//		_window->display();
+		_window->clear(sf::Color::Red);
+		_window->draw(_pixels.data(), _pixels.size(), sf::Points);
+		_window->display();
 	} else {
 		_mode = 2;
 	}
