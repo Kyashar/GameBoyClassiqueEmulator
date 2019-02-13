@@ -29,31 +29,40 @@ bool emulator::Cpu::gotSomethingToRead() const
 void emulator::Cpu::readInstruction()
 {
 	uint8_t cData = 0;
-  	uint16_t sData = 0;
-  	auto tmp = _register.pc;
+	uint16_t sData = 0;
+	auto tmp = _register.pc;
+	bool readline = false;
 
-  	_register.m = 0;
+	if (tmp == 0x20)
+		readline = true;
+	_register.m = 0;
+//	if (_memory[_register.pc] != 0)
+//		std::cout << managedInstruction[_memory[_register.pc]]._name;
+
 	if (managedInstruction[_memory[_register.pc]]._length == 2) {
 		cData = _memory[_register.pc + 1];
 		sData = cData;
 	} else if (managedInstruction[_memory[_register.pc]]._length == 3)
 		sData = _memory.getShort(_register.pc + 1);
 
-	if (_memory[_register.pc] != 0)
-		std::cout << managedInstruction[_memory[_register.pc]]._name << std::endl;
+//	if (managedInstruction[_memory[_register.pc]]._length != 1)
+//		std::cout << " arg: " << (int)sData;
+//	std::cout << std::endl;
+
 	_register.t += managedInstruction[_memory[_register.pc]]._timer;
 	_register.m = _register.t * 4;
 	(*this.*managedInstruction[_memory[_register.pc]]._instruction)(sData);
 
+//	if (_memory[tmp] == 0x20 && (int8_t)sData == -2) {
+//		std::cout << _register << std::endl;
+//		exit(84);
+//	}
 	if (tmp == _register.pc)
-		_register.pc += managedInstruction[_memory[_register.pc]]._length;
-	else {
-		_register.pc += managedInstruction[_memory[_register.pc]]._length;
-		std::cout << std::endl << "tmp :" << tmp << ", pc: "
-			  << _register.pc << std::endl << std::endl;
-	}
-
+		_register.pc += managedInstruction[_memory[tmp]]._length;
 	_gpu.put(_register.t);
+	std::string input_line;
+	if (readline)
+		getline(std::cin, input_line);
 }
 
 std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos &infos)
@@ -278,7 +287,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"RET Z", 1, &Cpu::Ret_Z, 4}, // 2
 	{"RET", 1, &Cpu::Ret, 4},
 	{"JP Z, a16", 3, &Cpu::Jp_Z, 4}, //3
-	{"PREFIX CB", 1, &Cpu::Prefix_Cb, 1},
+	{"PREFIX CB", 2, &Cpu::Prefix_Cb, 1},
 	{"CALL Z, a16", 3, &Cpu::Call_Z, 6}, //3
 	{"CALL a16", 3, &Cpu::Call, 6},
 	{"ADC  A, d8", 2, &Cpu::Adc, 2},
@@ -334,4 +343,278 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"NOT IMPLEMENTED", 1, &Cpu::default_operator, 1},
 	{"CP  d8", 2, &Cpu::Cp, 2},
 	{"RST 38H", 1, &Cpu::Rst_38H, 4},
+};
+
+std::vector<emulator::Cpu::prefixInfos> emulator::Cpu::prefixInstruction = {
+	{"RLC B", &Cpu::RLC_B}, /* 0x00 */
+	{"RLC C", &Cpu::RLC_C},
+	{"RLC D", &Cpu::RLC_D},
+	{"RLC E", &Cpu::RLC_E},
+	{"RLC H", &Cpu::RLC_H},
+	{"RLC L", &Cpu::RLC_L},
+	{"RLC (HL)", &Cpu::RLC_HLp},
+	{"RLC A", &Cpu::RLC_A},
+	{"RRC B", &Cpu::RRC_B},
+	{"RRC C", &Cpu::RRC_C},
+	{"RRC D", &Cpu::RRC_D},
+	{"RRC E", &Cpu::RRC_E},
+	{"RRC H", &Cpu::RRC_H},
+	{"RRC L", &Cpu::RRC_L},
+	{"RRC (HL)", &Cpu::RRC_HLp},
+	{"RRC A", &Cpu::RRC_A},
+
+	{"RL B", &Cpu::RL_B}, /* 0x00 */
+	{"RL C", &Cpu::RL_C},
+	{"RL D", &Cpu::RL_D},
+	{"RL E", &Cpu::RL_E},
+	{"RL H", &Cpu::RL_H},
+	{"RL L", &Cpu::RL_L},
+	{"RL (HL)", &Cpu::RL_HLp},
+	{"RL A", &Cpu::RL_A},
+	{"RR B", &Cpu::RR_B},
+	{"RR C", &Cpu::RR_C},
+	{"RR D", &Cpu::RR_D},
+	{"RR E", &Cpu::RR_E},
+	{"RR H", &Cpu::RR_H},
+	{"RR L", &Cpu::RR_L},
+	{"RR (HL)", &Cpu::RR_HLp},
+	{"RR A", &Cpu::RR_A},
+
+	{"SLA B", &Cpu::SLA_B}, /* 0x00 */
+	{"SLA C", &Cpu::SLA_C},
+	{"SLA D", &Cpu::SLA_D},
+	{"SLA E", &Cpu::SLA_E},
+	{"SLA H", &Cpu::SLA_H},
+	{"SLA L", &Cpu::SLA_L},
+	{"SLA (HL)", &Cpu::SLA_HLp},
+	{"SLA A", &Cpu::SLA_A},
+	{"SRA B", &Cpu::SRA_B},
+	{"SRA C", &Cpu::SRA_C},
+	{"SRA D", &Cpu::SRA_D},
+	{"SRA E", &Cpu::SRA_E},
+	{"SRA H", &Cpu::SRA_H},
+	{"SRA L", &Cpu::SRA_L},
+	{"SRA (HL)", &Cpu::SRA_HLp},
+	{"SRA A", &Cpu::SRA_A},
+
+	{"SWAP B", &Cpu::SWAP_B}, /* 0x00 */
+	{"SWAP C", &Cpu::SWAP_C},
+	{"SWAP D", &Cpu::SWAP_D},
+	{"SWAP E", &Cpu::SWAP_E},
+	{"SWAP H", &Cpu::SWAP_H},
+	{"SWAP L", &Cpu::SWAP_L},
+	{"SWAP (HL)", &Cpu::SWAP_HLp},
+	{"SWAP A", &Cpu::SWAP_A},
+	{"SRL B", &Cpu::SRL_B},
+	{"SRL C", &Cpu::SRL_C},
+	{"SRL D", &Cpu::SRL_D},
+	{"SRL E", &Cpu::SRL_E},
+	{"SRL H", &Cpu::SRL_H},
+	{"SRL L", &Cpu::SRL_L},
+	{"SRL (HL)", &Cpu::SRL_HLp},
+	{"SRL A", &Cpu::SRL_A},
+
+	{"BIT 0, B", &Cpu::BIT_0_B}, /* 0x00 */
+	{"BIT 0, C", &Cpu::BIT_0_C},
+	{"BIT 0, D", &Cpu::BIT_0_D},
+	{"BIT 0, E", &Cpu::BIT_0_E},
+	{"BIT 0, H", &Cpu::BIT_0_H},
+	{"BIT 0, L", &Cpu::BIT_0_L},
+	{"BIT 0, (HL)", &Cpu::BIT_0_Hlp},
+	{"BIT 0, A", &Cpu::BIT_0_A},
+	{"BIT 1, B", &Cpu::BIT_1_B},
+	{"BIT 1, C", &Cpu::BIT_1_C},
+	{"BIT 1, D", &Cpu::BIT_1_D},
+	{"BIT 1, E", &Cpu::BIT_1_E},
+	{"BIT 1, H", &Cpu::BIT_1_H},
+	{"BIT 1, L", &Cpu::BIT_1_L},
+	{"BIT 1, (HL)", &Cpu::BIT_1_Hlp},
+	{"BIT 1, A", &Cpu::BIT_1_A},
+
+	{"BIT 2, B", &Cpu::BIT_2_B}, /* 0x00 */
+	{"BIT 2, C", &Cpu::BIT_2_C},
+	{"BIT 2, D", &Cpu::BIT_2_D},
+	{"BIT 2, E", &Cpu::BIT_2_E},
+	{"BIT 2, H", &Cpu::BIT_2_H},
+	{"BIT 2, L", &Cpu::BIT_2_L},
+	{"BIT 2, (HL)", &Cpu::BIT_2_Hlp},
+	{"BIT 2, A", &Cpu::BIT_2_A},
+	{"BIT 3, B", &Cpu::BIT_3_B},
+	{"BIT 3, C", &Cpu::BIT_3_C},
+	{"BIT 3, D", &Cpu::BIT_3_D},
+	{"BIT 3, E", &Cpu::BIT_3_E},
+	{"BIT 3, H", &Cpu::BIT_3_H},
+	{"BIT 3, L", &Cpu::BIT_3_L},
+	{"BIT 3, (HL)", &Cpu::BIT_3_Hlp},
+	{"BIT 3, A", &Cpu::BIT_3_A},
+
+	{"BIT 4, B", &Cpu::BIT_4_B}, /* 0x00 */
+	{"BIT 4, C", &Cpu::BIT_4_C},
+	{"BIT 4, D", &Cpu::BIT_4_D},
+	{"BIT 4, E", &Cpu::BIT_4_E},
+	{"BIT 4, H", &Cpu::BIT_4_H},
+	{"BIT 4, L", &Cpu::BIT_4_L},
+	{"BIT 4, (HL)", &Cpu::BIT_4_Hlp},
+	{"BIT 4, A", &Cpu::BIT_4_A},
+	{"BIT 5, B", &Cpu::BIT_5_B},
+	{"BIT 5, C", &Cpu::BIT_5_C},
+	{"BIT 5, D", &Cpu::BIT_5_D},
+	{"BIT 5, E", &Cpu::BIT_5_E},
+	{"BIT 5, H", &Cpu::BIT_5_H},
+	{"BIT 5, L", &Cpu::BIT_5_L},
+	{"BIT 5, (HL)", &Cpu::BIT_5_Hlp},
+	{"BIT 5, A", &Cpu::BIT_5_A},
+
+	{"BIT 6, B", &Cpu::BIT_6_B}, /* 0x00 */
+	{"BIT 6, C", &Cpu::BIT_6_C},
+	{"BIT 6, D", &Cpu::BIT_6_D},
+	{"BIT 6, E", &Cpu::BIT_6_E},
+	{"BIT 6, H", &Cpu::BIT_6_H},
+	{"BIT 6, L", &Cpu::BIT_6_L},
+	{"BIT 6, (HL)", &Cpu::BIT_6_Hlp},
+	{"BIT 6, A", &Cpu::BIT_6_A},
+	{"BIT 7, B", &Cpu::BIT_7_B},
+	{"BIT 7, C", &Cpu::BIT_7_C},
+	{"BIT 7, D", &Cpu::BIT_7_D},
+	{"BIT 7, E", &Cpu::BIT_7_E},
+	{"BIT 7, H", &Cpu::BIT_7_H},
+	{"BIT 7, L", &Cpu::BIT_7_L},
+	{"BIT 7, (HL)", &Cpu::BIT_7_Hlp},
+	{"BIT 7, A", &Cpu::BIT_7_A},
+
+	{"RES 0, B", &Cpu::RES_0_B}, /* 0x00 */
+	{"RES 0, C", &Cpu::RES_0_C},
+	{"RES 0, D", &Cpu::RES_0_D},
+	{"RES 0, E", &Cpu::RES_0_E},
+	{"RES 0, H", &Cpu::RES_0_H},
+	{"RES 0, L", &Cpu::RES_0_L},
+	{"RES 0, (HL)", &Cpu::RES_0_Hlp},
+	{"RES 0, A", &Cpu::RES_0_A},
+	{"RES 1, B", &Cpu::RES_1_B},
+	{"RES 1, C", &Cpu::RES_1_C},
+	{"RES 1, D", &Cpu::RES_1_D},
+	{"RES 1, E", &Cpu::RES_1_E},
+	{"RES 1, H", &Cpu::RES_1_H},
+	{"RES 1, L", &Cpu::RES_1_L},
+	{"RES 1, (HL)", &Cpu::RES_1_Hlp},
+	{"RES 1, A", &Cpu::RES_1_A},
+
+	{"RES 2, B", &Cpu::RES_2_B}, /* 0x00 */
+	{"RES 2, C", &Cpu::RES_2_C},
+	{"RES 2, D", &Cpu::RES_2_D},
+	{"RES 2, E", &Cpu::RES_2_E},
+	{"RES 2, H", &Cpu::RES_2_H},
+	{"RES 2, L", &Cpu::RES_2_L},
+	{"RES 2, (HL)", &Cpu::RES_2_Hlp},
+	{"RES 2, A", &Cpu::RES_2_A},
+	{"RES 3, B", &Cpu::RES_3_B},
+	{"RES 3, C", &Cpu::RES_3_C},
+	{"RES 3, D", &Cpu::RES_3_D},
+	{"RES 3, E", &Cpu::RES_3_E},
+	{"RES 3, H", &Cpu::RES_3_H},
+	{"RES 3, L", &Cpu::RES_3_L},
+	{"RES 3, (HL)", &Cpu::RES_3_Hlp},
+	{"RES 3, A", &Cpu::RES_3_A},
+
+	{"RES 4, B", &Cpu::RES_4_B}, /* 0x00 */
+	{"RES 4, C", &Cpu::RES_4_C},
+	{"RES 4, D", &Cpu::RES_4_D},
+	{"RES 4, E", &Cpu::RES_4_E},
+	{"RES 4, H", &Cpu::RES_4_H},
+	{"RES 4, L", &Cpu::RES_4_L},
+	{"RES 4, (HL)", &Cpu::RES_4_Hlp},
+	{"RES 4, A", &Cpu::RES_4_A},
+	{"RES 5, B", &Cpu::RES_5_B},
+	{"RES 5, C", &Cpu::RES_5_C},
+	{"RES 5, D", &Cpu::RES_5_D},
+	{"RES 5, E", &Cpu::RES_5_E},
+	{"RES 5, H", &Cpu::RES_5_H},
+	{"RES 5, L", &Cpu::RES_5_L},
+	{"RES 5, (HL)", &Cpu::RES_5_Hlp},
+	{"RES 5, A", &Cpu::RES_5_A},
+
+	{"RES 6, B", &Cpu::RES_6_B}, /* 0x00 */
+	{"RES 6, C", &Cpu::RES_6_C},
+	{"RES 6, D", &Cpu::RES_6_D},
+	{"RES 6, E", &Cpu::RES_6_E},
+	{"RES 6, H", &Cpu::RES_6_H},
+	{"RES 6, L", &Cpu::RES_6_L},
+	{"RES 6, (HL)", &Cpu::RES_6_Hlp},
+	{"RES 6, A", &Cpu::RES_6_A},
+	{"RES 7, B", &Cpu::RES_7_B},
+	{"RES 7, C", &Cpu::RES_7_C},
+	{"RES 7, D", &Cpu::RES_7_D},
+	{"RES 7, E", &Cpu::RES_7_E},
+	{"RES 7, H", &Cpu::RES_7_H},
+	{"RES 7, L", &Cpu::RES_7_L},
+	{"RES 7, (HL)", &Cpu::RES_7_Hlp},
+	{"RES 7, A", &Cpu::RES_7_A},
+
+	{"SET 0, B", &Cpu::SET_0_B}, /* 0x00 */
+	{"SET 0, C", &Cpu::SET_0_C},
+	{"SET 0, D", &Cpu::SET_0_D},
+	{"SET 0, E", &Cpu::SET_0_E},
+	{"SET 0, H", &Cpu::SET_0_H},
+	{"SET 0, L", &Cpu::SET_0_L},
+	{"SET 0, (HL)", &Cpu::SET_0_Hlp},
+	{"SET 0, A", &Cpu::SET_0_A},
+	{"SET 1, B", &Cpu::SET_1_B},
+	{"SET 1, C", &Cpu::SET_1_C},
+	{"SET 1, D", &Cpu::SET_1_D},
+	{"SET 1, E", &Cpu::SET_1_E},
+	{"SET 1, H", &Cpu::SET_1_H},
+	{"SET 1, L", &Cpu::SET_1_L},
+	{"SET 1, (HL)", &Cpu::SET_1_Hlp},
+	{"SET 1, A", &Cpu::SET_1_A},
+
+	{"SET 2, B", &Cpu::SET_2_B}, /* 0x00 */
+	{"SET 2, C", &Cpu::SET_2_C},
+	{"SET 2, D", &Cpu::SET_2_D},
+	{"SET 2, E", &Cpu::SET_2_E},
+	{"SET 2, H", &Cpu::SET_2_H},
+	{"SET 2, L", &Cpu::SET_2_L},
+	{"SET 2, (HL)", &Cpu::SET_2_Hlp},
+	{"SET 2, A", &Cpu::SET_2_A},
+	{"SET 3, B", &Cpu::SET_3_B},
+	{"SET 3, C", &Cpu::SET_3_C},
+	{"SET 3, D", &Cpu::SET_3_D},
+	{"SET 3, E", &Cpu::SET_3_E},
+	{"SET 3, H", &Cpu::SET_3_H},
+	{"SET 3, L", &Cpu::SET_3_L},
+	{"SET 3, (HL)", &Cpu::SET_3_Hlp},
+	{"SET 3, A", &Cpu::SET_3_A},
+
+	{"SET 4, B", &Cpu::SET_4_B}, /* 0x00 */
+	{"SET 4, C", &Cpu::SET_4_C},
+	{"SET 4, D", &Cpu::SET_4_D},
+	{"SET 4, E", &Cpu::SET_4_E},
+	{"SET 4, H", &Cpu::SET_4_H},
+	{"SET 4, L", &Cpu::SET_4_L},
+	{"SET 4, (HL)", &Cpu::SET_4_Hlp},
+	{"SET 4, A", &Cpu::SET_4_A},
+	{"SET 5, B", &Cpu::SET_5_B},
+	{"SET 5, C", &Cpu::SET_5_C},
+	{"SET 5, D", &Cpu::SET_5_D},
+	{"SET 5, E", &Cpu::SET_5_E},
+	{"SET 5, H", &Cpu::SET_5_H},
+	{"SET 5, L", &Cpu::SET_5_L},
+	{"SET 5, (HL)", &Cpu::SET_5_Hlp},
+	{"SET 5, A", &Cpu::SET_5_A},
+
+	{"SET 6, B", &Cpu::SET_6_B}, /* 0x00 */
+	{"SET 6, C", &Cpu::SET_6_C},
+	{"SET 6, D", &Cpu::SET_6_D},
+	{"SET 6, E", &Cpu::SET_6_E},
+	{"SET 6, H", &Cpu::SET_6_H},
+	{"SET 6, L", &Cpu::SET_6_L},
+	{"SET 6, (HL)", &Cpu::SET_6_Hlp},
+	{"SET 6, A", &Cpu::SET_6_A},
+	{"SET 7, B", &Cpu::SET_7_B},
+	{"SET 7, C", &Cpu::SET_7_C},
+	{"SET 7, D", &Cpu::SET_7_D},
+	{"SET 7, E", &Cpu::SET_7_E},
+	{"SET 7, H", &Cpu::SET_7_H},
+	{"SET 7, L", &Cpu::SET_7_L},
+	{"SET 7, (HL)", &Cpu::SET_7_Hlp},
+	{"SET 7, A", &Cpu::SET_7_A}
 };

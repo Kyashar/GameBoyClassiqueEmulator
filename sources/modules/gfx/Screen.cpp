@@ -61,8 +61,10 @@ void gfx::Screen::put(size_t timer)
 		Vblank();
 	else if (_mode == 2)
 		ObjectRead();
-	else if (_mode == 3)
+	else if (_mode == 3) {
 		renderLine();
+//		_memory.dumpMemory(0x9800, 0x9BFF);
+	}
 }
 
 /**
@@ -79,9 +81,9 @@ void gfx::Screen::Hblank()
 
 	if (line == 143) {
 		_mode = 1;
-		_window->clear(sf::Color::Red);
-		_window->draw(_pixels.data(), _pixels.size(), sf::Points);
-		_window->display();
+//		_window->clear(sf::Color::Red);
+//		_window->draw(_pixels.data(), _pixels.size(), sf::Points);
+//		_window->display();
 	} else {
 		_mode = 2;
 	}
@@ -134,7 +136,6 @@ void gfx::Screen::renderLine()
 		do {
 //			std::cout << _memory.getGpuRegister().getLine() * 160 << std::endl;
 //			if (_memory.getGpuRegister().getLine() * 160 + i < 23040)
-//			std::cout << tileNumber << std::endl;
 			(*this)[_memory.getGpuRegister().getLine()][i].color = getColorFromAddress(getAddressFromTile(tileNumber, _memory.getGpuRegister().getLine()), bit);
 			bit <<= 1;
 			i++;

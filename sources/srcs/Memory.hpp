@@ -49,6 +49,7 @@ namespace emulator
 			GpuRegister() : gpuControl(0), beginDisplay(0, 0), line(0), bgPalette(0) {}
 			GpuRegister(sf::Vector2u &display, unsigned int &l) : gpuControl(0), beginDisplay(display), line(l), bgPalette(0) {}
 			unsigned char &operator[](size_t address) {
+				zero = 0;
 				if (address == 0xFF40)
 					return gpuControl;
 				if (address == 0xFF41)
@@ -59,14 +60,12 @@ namespace emulator
 					return beginDisplay.x;
 				if (address == 0xFF44)
 					return line;
-				/*
-				 * if (address == 0xff45)
-				 * 	CMPLINE
-				 */
+				if (address == 0xFF45)
+				 	return cmpline;
 				if (address == 0xFF47)
 					return bgPalette;
-				std::cout << "ERROR" << std::endl;
-				return bgPalette;
+				std::cout << "ERROR: " << address << std::endl;
+				return zero;
 			}
 			unsigned char &getControl() {return gpuControl;}
 			sf::Vector2<unsigned char> &getDisplay() {return beginDisplay;}
@@ -95,17 +94,19 @@ namespace emulator
 			unsigned char gpuStatus;
 			sf::Vector2<unsigned char> beginDisplay;
 			unsigned char line;
+			unsigned char cmpline;
 			unsigned char bgPalette;
+			unsigned char zero;
 
 		};
 
-		Memory() : _biosReaded(true),_bios(), _rom(), _vram(),
-			   _eram(), _wram(), _oam(), _zram() {}
+		Memory();
 		~Memory() = default;
 
 		void loadRom(std::vector<uint8_t> &data);
 		uint16_t getShort(int index);
 		void setShort(int index, uint16_t value);
+		void dumpMemory(int begin, int end);
 
 		GpuRegister  &getGpuRegister() {return _registerGpu;}
 		uint8_t &operator[](int index);

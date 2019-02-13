@@ -56,8 +56,8 @@ namespace emulator
 		struct {
 			union {
 				struct {
-					unsigned char m;
 					unsigned char t;
+					unsigned char m;
 				};
 				unsigned short mt;
 			};
