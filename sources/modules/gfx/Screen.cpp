@@ -63,7 +63,6 @@ void gfx::Screen::put(size_t timer)
 		ObjectRead();
 	else if (_mode == 3) {
 		renderLine();
-//		_memory.dumpMemory(0x9800, 0x9BFF);
 	}
 }
 
@@ -134,8 +133,6 @@ void gfx::Screen::renderLine()
 		bit = 1;
 		tileNumber = _memory[addr + lineoffs + i / 8];
 		do {
-//			std::cout << _memory.getGpuRegister().getLine() * 160 << std::endl;
-//			if (_memory.getGpuRegister().getLine() * 160 + i < 23040)
 			(*this)[_memory.getGpuRegister().getLine()][i].color = getColorFromAddress(getAddressFromTile(tileNumber, _memory.getGpuRegister().getLine()), bit);
 			bit <<= 1;
 			i++;

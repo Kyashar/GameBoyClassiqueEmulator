@@ -18,7 +18,7 @@ namespace emulator
 	/**
 	 * emulation for gameboy memory
 	 *
-	 * $FFFF		Interrupt Enable Flag
+	 * $FFFF	Interrupt Enable Flag
 	 * $FF80-$FFFE	Zero Page - 127 bytes
 	 * $FF00-$FF7F	Hardware I/O Registers
 	 *
@@ -58,9 +58,8 @@ namespace emulator
 					return beginDisplay.y;
 				if (address == 0xFF43)
 					return beginDisplay.x;
-				if (address == 0xFF44) {
+				if (address == 0xFF44)
 					return (line >= 0x90) ? o: line;
-				}
 				if (address == 0xFF45)
 				 	return cmpline;
 				if (address == 0xFF47)
@@ -68,13 +67,14 @@ namespace emulator
 				std::cout << "ERROR: " << address << std::endl;
 				return zero;
 			}
+			unsigned char &getStatus() {return gpuStatus;}
 			unsigned char &getControl() {return gpuControl;}
 			sf::Vector2<unsigned char> &getDisplay() {return beginDisplay;}
 			unsigned char &getLine() {return line;}
 			unsigned char &getPalette() {return bgPalette;}
 			unsigned char getPalette(unsigned int index) {
 				unsigned char masque = 3;
-				return bgPalette & (masque << (index * 2));
+				return (bgPalette & (masque << (index * 2))) >> (index * 2);
 			}
 
 			bool background() {return gpuControl & 0b1;}
@@ -108,6 +108,7 @@ namespace emulator
 		uint16_t getShort(int index);
 		void setShort(int index, uint16_t value);
 		void dumpMemory(int begin, int end);
+		std::array<uint8_t, 32768> getRom() {return _rom;}
 
 		GpuRegister  &getGpuRegister() {return _registerGpu;}
 		uint8_t &operator[](int index);
@@ -134,6 +135,8 @@ namespace emulator
 		std::array<uint8_t, 128> _zram;
 	};
 }
+
+std::ostream &operator<<(std::ostream &os, emulator::Memory::GpuRegister &reg);
 
 
 #endif //EMULATOR_GAMEBOY_MEMORY_HPP

@@ -54,15 +54,15 @@ void emulator::Memory::setShort(int index, uint16_t value)
 
 void emulator::Memory::dumpMemory(int begin, int end)
 {
-	for (int index = begin; index < end;) {
+	for (int index = begin; index <= end;) {
 		if (index % 16 == 0)
-			std::cout << std::setfill('0') << std::setw(8) << index << ":";
+			std::cout << std::setfill('0') << std::setw(8) << std::hex << (int)index << ":";
 		if (index % 2 == 0)
-			std::cout << " ";
-		std::cout << std::setfill('0') << std::setw(2) << std::hex << operator[](index);
+			std::cout << std::setw(0) << " ";
+		std::cout << std::setfill('0') << std::setw(2) << std::hex << (int)operator[](index);
 		index++;
-		if (index % 16 == 0)
-			std::cout << std::endl;
+		if (index % 16 == 0 && index != end)
+			std::cout << std::setw(0) << std::endl;
 	}
 	std::cout << std::endl;
 }
@@ -78,9 +78,12 @@ uint8_t &emulator::Memory::operator[](int addr)
 			if (addr < 0x0100) {
 				return _bios[addr];
 			} else {
+				std::cerr << "end bios" << std::endl;
+				std::cout << "end bios" << std::endl;
 				_biosReaded = true;
 			}
 		}
+		dumpMemory(0x9800, 0x9FFF);
 		return _rom[addr];
 	}
 	else if (addr < 0x8000) {        // ROM
@@ -108,3 +111,17 @@ uint8_t &emulator::Memory::operator[](int addr)
 		return _oam[((unsigned int)addr) & ((unsigned int)0x7F)];
 	return zero;
 }
+
+#include <bitset>
+
+std::ostream &operator<<(std::ostream &os, emulator::Memory::GpuRegister &reg)
+{
+	os << "begin display X: " << (int)reg.beginDisplay.x << std::endl;
+	os << "begin display Y: " << (int)reg.beginDisplay.y << std::endl;
+	os << "line " << (int)reg.line << std::endl;
+	os << "bg palette " << std::bitset<8>(reg.getPalette()) << std::endl;
+	os << "bg control " << std::bitset<8>(reg.getControl()) << std::endl;
+	os << "bg status " << std::bitset<8>(reg.getStatus()) << std::endl;
+	return os;
+}
+

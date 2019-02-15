@@ -40,6 +40,7 @@ namespace emulator
 		 * Read instruction and call the right function
 		 */
 		void readInstruction();
+		void disassemblyRom();
 
 	private:
 		static std::vector<instructionInfos> managedInstruction;
@@ -248,11 +249,11 @@ namespace emulator
 		void Cp_L(uint16_t)   {_register.setFlagC(_register.l > _register.a); _register.setFlagN(true); _register.setFlagZ(_register.l == _register.a);}
 		void Cp_Hlp(uint16_t) {_register.setFlagC(_memory[_register.hl] > _register.a); _register.setFlagN(true); _register.setFlagZ(_memory[_register.hl] == _register.a);}
 
-		void Call(uint16_t arg)    {                            this->revPushStack(_register.pc + 2); _register.pc = arg;}
-		void Call_C(uint16_t arg)  {if (_register.getFlagC())  {this->revPushStack(_register.pc + 2); _register.pc = arg;} else _register.m -= 3;}
-		void Call_Z(uint16_t arg)  {if (_register.getFlagZ())  {this->revPushStack(_register.pc + 2); _register.pc = arg;} else _register.m -= 3;}
-		void Call_Nc(uint16_t arg) {if (!_register.getFlagC()) {this->revPushStack(_register.pc + 2); _register.pc = arg;} else _register.m -= 3;}
-		void Call_Nz(uint16_t arg) {if (!_register.getFlagZ()) {this->revPushStack(_register.pc + 2); _register.pc = arg;} else _register.m -= 3;}
+		void Call(uint16_t arg)    {                            this->revPushStack(_register.pc + 3); _register.pc = arg;}
+		void Call_C(uint16_t arg)  {if (_register.getFlagC())  {this->revPushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
+		void Call_Z(uint16_t arg)  {if (_register.getFlagZ())  {this->revPushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
+		void Call_Nc(uint16_t arg) {if (!_register.getFlagC()) {this->revPushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
+		void Call_Nz(uint16_t arg) {if (!_register.getFlagZ()) {this->revPushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
 
 		void Push_De(uint16_t) {this->pushStack(_register.de);}
 		void Push_Hl(uint16_t) {this->pushStack(_register.hl);}
@@ -327,7 +328,7 @@ namespace emulator
 		void Ld_B_H(uint16_t) {_register.b = _register.h;}
 		void Ld_B_L(uint16_t) {_register.b = _register.l;}
 		void Ld_B_Hlp(uint16_t) {_register.b = _memory[_register.hl];}
-		void Ld_B_A(uint16_t) {_register.c = _register.a;}
+		void Ld_B_A(uint16_t) {_register.b = _register.a;}
 
 		void Ld_C(uint16_t arg) {_register.c = arg;}
 		void Ld_C_B(uint16_t) {_register.c = _register.b;}
@@ -339,7 +340,7 @@ namespace emulator
 		void Ld_C_Hlp(uint16_t) {_register.c = _memory[_register.hl];}
 		void Ld_C_A(uint16_t) {_register.c = _register.a;}
 
-		void Ld_D(uint16_t arg) {_register.e = arg;}
+		void Ld_D(uint16_t arg) {_register.d = arg;}
 		void Ld_D_B(uint16_t) {_register.d = _register.b;}
 		void Ld_D_C(uint16_t) {_register.d = _register.c;}
 		void Ld_D_D(uint16_t) {_register.d = _register.d;}
@@ -350,14 +351,14 @@ namespace emulator
 		void Ld_D_A(uint16_t) {_register.d = _register.a;}
 
 		void Ld_E(uint16_t arg) {_register.e = arg;}
-		void Ld_E_B(uint16_t) {_register.d = _register.b;}
-		void Ld_E_C(uint16_t) {_register.d = _register.c;}
-		void Ld_E_D(uint16_t) {_register.d = _register.d;}
-		void Ld_E_E(uint16_t) {_register.d = _register.e;}
-		void Ld_E_H(uint16_t) {_register.d = _register.h;}
-		void Ld_E_L(uint16_t) {_register.d = _register.l;}
-		void Ld_E_Hlp(uint16_t) {_register.d = _memory[_register.hl];}
-		void Ld_E_A(uint16_t) {_register.d = _register.a;}
+		void Ld_E_B(uint16_t) {_register.e = _register.b;}
+		void Ld_E_C(uint16_t) {_register.e = _register.c;}
+		void Ld_E_D(uint16_t) {_register.e = _register.d;}
+		void Ld_E_E(uint16_t) {_register.e = _register.e;}
+		void Ld_E_H(uint16_t) {_register.e = _register.h;}
+		void Ld_E_L(uint16_t) {_register.e = _register.l;}
+		void Ld_E_Hlp(uint16_t) {_register.e = _memory[_register.hl];}
+		void Ld_E_A(uint16_t) {_register.e = _register.a;}
 
 		void Ld_H(uint16_t arg) {_register.h = arg;}
 		void Ld_H_B(uint16_t) {_register.h = _register.b;}
@@ -401,7 +402,7 @@ namespace emulator
 		void RRC_D() {auto ci = _register.d & 0b1; _register.d = (_register.d >> 1) + (ci ? 0b10000000 : 0); _register.f = 0; _register.setFlagC(ci); _register.setFlagZ(_register.d == 0);}
 		void RRC_E() {auto ci = _register.e & 0b1; _register.e = (_register.e >> 1) + (ci ? 0b10000000 : 0); _register.f = 0; _register.setFlagC(ci); _register.setFlagZ(_register.e == 0);}
 		void RRC_H() {auto ci = _register.h & 0b1; _register.h = (_register.h >> 1) + (ci ? 0b10000000 : 0); _register.f = 0; _register.setFlagC(ci); _register.setFlagZ(_register.h == 0);}
-		void RRC_L() {auto ci = _register.b & 0b1; _register.b = (_register.b >> 1) + (ci ? 0b10000000 : 0); _register.f = 0; _register.setFlagC(ci); _register.setFlagZ(_register.l == 0);}
+		void RRC_L() {auto ci = _register.l & 0b1; _register.l = (_register.l >> 1) + (ci ? 0b10000000 : 0); _register.f = 0; _register.setFlagC(ci); _register.setFlagZ(_register.l == 0);}
 		void RRC_HLp() {auto ci = _memory[_register.hl] & 0b1; _memory[_register.hl] = (_memory[_register.hl] >> 1) + (ci ? 0b10000000 : 0); _register.f = 0; _register.setFlagC(ci); _register.setFlagZ(_memory[_register.hl] == 0);}
 		void RRC_A() {auto ci = _register.a & 0b1; _register.a = (_register.a >> 1) + (ci ? 0b10000000 : 0); _register.f = 0; _register.setFlagC(ci); _register.setFlagZ(_register.a == 0);}
 
