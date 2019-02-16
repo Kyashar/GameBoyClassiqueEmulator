@@ -49,7 +49,7 @@ void emulator::Cpu::readInstruction()
 		sData = _memory.getShort(_register.pc + 1);
 	if (readline)
 		std::cout << managedInstruction[_memory[_register.pc]]._name << std::endl;
-	if (managedInstruction[_memory[tmp]]._length > 1)
+	if (managedInstruction[_memory[tmp]]._length > 1 && readline)
 		std::cout << std::hex << "args :" << sData << std::endl;
 
 	_register.t += managedInstruction[_memory[_register.pc]]._timer;
@@ -63,8 +63,12 @@ void emulator::Cpu::readInstruction()
 	if (readline) {
 		std::cout << std::hex << _register << std::endl;
 		std::cout << std::hex << _memory.getGpuRegister() << std::endl;
-//		_memory.dumpMemory(0x9800, 0x9BFF);
-//	getline(std::cin, input_line);
+		std::cout << "y: " << (_memory.getGpuRegister().getDisplay().y / 8) << std::endl;
+		std::cout << "x: " << (_memory.getGpuRegister().getDisplay().x / 8) << std::endl;
+		_memory.dumpMemory(0x9800, 0x9BFF);
+		std::cout << std::endl;
+		_memory.dumpMemory(0x8000, 0x8000 + 256 * 16);
+		getline(std::cin, input_line);
 	}
 }
 

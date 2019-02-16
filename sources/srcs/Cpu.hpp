@@ -100,10 +100,7 @@ namespace emulator
 		void Ei(uint16_t) {}         /* enable interupt */
 		void Reti(uint16_t) {}       /* enable sub routine */
 		void Di(uint16_t) {}         /* disable interrupt */
-		void Prefix_Cb(uint16_t arg) {
-//			std::cout << "\t" << prefixInstruction[arg]._name << std::endl;
-			(*this.*prefixInstruction[arg]._instruction)();
-		}  /* Call Prefix CB */
+		void Prefix_Cb(uint16_t arg) {(*this.*prefixInstruction[arg]._instruction)();}  /* Call Prefix CB */
 
 		void Cpl(uint16_t) {_register.a = ~_register.a; _register.setFlagN(true); _register.setFlagH(true);}
 		void Scf(uint16_t) {}

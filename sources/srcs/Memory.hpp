@@ -46,9 +46,9 @@ namespace emulator
 	{
 	public:
 		struct GpuRegister {
-			GpuRegister() : gpuControl(0), beginDisplay(0, 0), line(0), bgPalette(0) {}
+			GpuRegister() : gpuControl(0), gpuStatus(2), beginDisplay(0, 0), line(0), bgPalette(0) {}
 			GpuRegister(sf::Vector2u &display, unsigned int &l) : gpuControl(0), beginDisplay(display), line(l), bgPalette(0) {}
-			unsigned char &operator[](size_t address) {
+			uint8_t &operator[](size_t address) {
 				zero = 0;
 				if (address == 0xFF40)
 					return gpuControl;
@@ -73,7 +73,7 @@ namespace emulator
 			unsigned char &getLine() {return line;}
 			unsigned char &getPalette() {return bgPalette;}
 			unsigned char getPalette(unsigned int index) {
-				unsigned char masque = 3;
+				unsigned char masque = 0b11;
 				return (bgPalette & (masque << (index * 2))) >> (index * 2);
 			}
 
@@ -112,7 +112,6 @@ namespace emulator
 
 		GpuRegister  &getGpuRegister() {return _registerGpu;}
 		uint8_t &operator[](int index);
-//		const uint8_t &operator[](int index) const;
 	private:
 //		std::array<uint8_t , 65536> _memory;
 

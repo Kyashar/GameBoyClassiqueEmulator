@@ -83,7 +83,7 @@ uint8_t &emulator::Memory::operator[](int addr)
 				_biosReaded = true;
 			}
 		}
-		dumpMemory(0x9800, 0x9FFF);
+//		dumpMemory(0x9800, 0x9FFF);
 		return _rom[addr];
 	}
 	else if (addr < 0x8000) {        // ROM
@@ -122,6 +122,9 @@ std::ostream &operator<<(std::ostream &os, emulator::Memory::GpuRegister &reg)
 	os << "bg palette " << std::bitset<8>(reg.getPalette()) << std::endl;
 	os << "bg control " << std::bitset<8>(reg.getControl()) << std::endl;
 	os << "bg status " << std::bitset<8>(reg.getStatus()) << std::endl;
+	for (int i = 0; i < 4; i++) {
+		std::cout << "Color " << i << ": " << (int)reg.getPalette(i) << std::endl;
+	}
 	return os;
 }
 

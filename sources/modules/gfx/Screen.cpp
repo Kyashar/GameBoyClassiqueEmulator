@@ -118,25 +118,40 @@ void gfx::Screen::renderLine()
 	if (_clock < 172)
 		return ;
 
-	size_t tileNumber;
+	char tileNumber;
+	int tileAdrresse;
 	int addr = _memory.getGpuRegister().bgTileMap() ? 0x9C00 : 0x9800;
-	auto lineoffs = (_memory.getGpuRegister().getDisplay().x / 8);
+	int lineoffs;
 	unsigned char bit;
+	unsigned int x;
+	unsigned int y;
 	_clock = 0;
 	_mode = 0;
 
 	// Which line of tiles to use in the map
-	addr += (_memory.getGpuRegister().getLine() + _memory.getGpuRegister().getDisplay().y) / 8;
+	addr += (((_memory.getGpuRegister().getLine() + _memory.getGpuRegister().getDisplay().y) & 255)/ 8) * 32;
+	lineoffs = _memory.getGpuRegister().getDisplay().x / 8;
 
 	// get addr from tile for line and index
-	for (size_t i = 0; i < 160;) {
-		bit = 1;
-		tileNumber = _memory[addr + lineoffs + i / 8];
-		do {
-			(*this)[_memory.getGpuRegister().getLine()][i].color = getColorFromAddress(getAddressFromTile(tileNumber, _memory.getGpuRegister().getLine()), bit);
-			bit <<= 1;
-			i++;
-		} while ((i % 8) != 0 && i < 160);
+	x = _memory.getGpuRegister().getDisplay().x % 8;
+	y = ((_memory.getGpuRegister().getLine() + _memory.getGpuRegister().getDisplay().y) & 255) % 8;
+	bit = (128 >> x);
+
+	tileNumber = _memory[addr + lineoffs];
+	tileAdrresse = getAddressFromTile(tileNumber, y);
+	for (size_t i = 0; i < 160; i++) {
+		operator[](_memory.getGpuRegister().getLine())[i].color = getColorFromAddress(tileAdrresse, bit);
+		bit >>= 1;
+		x++;
+		if (x == 8)  {
+			x = 0;
+			bit = 128;
+			lineoffs = (lineoffs + 1) & 31;
+			tileNumber = _memory[addr + lineoffs];
+			tileAdrresse = getAddressFromTile(tileNumber, y);
+		}
+		if (bit == 0 || x > 8)
+			exit(84);
 	}
 }
 
@@ -144,8 +159,7 @@ int gfx::Screen::getAddressFromTile(int tileNb, int line)
 {
 	if (!_memory.getGpuRegister().bgTileSet())
 		tileNb += 256;
-
-	return 0x8000 + (tileNb * 2 * 8) + (line % 8) * 2;
+	return 0x8000 + (tileNb * 8 * 2) + (line * 2);
 }
 
 sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit)
