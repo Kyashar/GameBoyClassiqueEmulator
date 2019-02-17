@@ -281,17 +281,16 @@ namespace emulator
 		void Jr_Z(uint16_t arg)  {if (_register.getFlagZ())  _register.pc += (int8_t)arg + 2; else _register.m -= 1;}
 		void Jr_C(uint16_t arg)  {if (_register.getFlagC())  _register.pc += (int8_t)arg + 2; else _register.m -= 1;}
 
-		void Ld_SP(uint16_t arg) {_memory[_register.pc + arg] = _register.sp;}
+		void Ld_SP(uint16_t arg) {_memory[arg] = (_register.sp & 0b1111111100000000) >> 8; _memory[arg + 1] = _register.sp & 0b11111111;}
 		void Ld_BC(uint16_t arg) {_register.bc = arg;}
-		void Ld_BC_A(uint16_t) {_memory[_register.pc + _register.bc] = _register.a;}
+		void Ld_BC_A(uint16_t) {_memory[_register.bc] = _register.a;}
 		void Ld_DE(uint16_t arg) {_register.de = arg;}
-		void Ld_DE_A(uint16_t) {_memory[_register.pc + _register.de] = _register.a;}
+		void Ld_DE_A(uint16_t) {_memory[_register.de] = _register.a;}
 		void Ld_Hlpp_A(uint16_t) {_memory[_register.hl] = _register.a; _register.hl++;}
-		void Ld_HL_SP(uint16_t arg) {size_t res = _register.sp + arg; _register.hl = res & 255; _register.setFlagZ(false); _register.setFlagN(false);}
+		void Ld_HL_SP(uint16_t arg) {_register.hl = _register.sp + arg; _register.setFlagZ(false); _register.setFlagN(false);}
 		void Ld_Sp_Hl(uint16_t) {_register.sp = _register.hl;}
-		void Ld_Cp(uint16_t arg) {_memory[0xFF00 + _register.c] = arg;}
+		void Ld_Cp(uint16_t) {_memory[0xFF00 + _register.c] = _register.a;}
 
-		void Ld_L(uint16_t arg) {_register.l = arg;}
 		void Ld_Sp(uint16_t arg) {_register.sp = arg;}
 		void Ld_Hl(uint16_t arg) { _register.hl = arg;}
 		void Ld_Hln_A(uint16_t) {_memory[_register.hl] = _register.a; _register.hl--;}
@@ -311,13 +310,13 @@ namespace emulator
 		void Ld_A_H(uint16_t) {_register.a = _register.h;}
 		void Ld_A_L(uint16_t) {_register.a = _register.l;}
 		void Ld_A_Cp(uint16_t) {_register.a = _memory[_register.c + 0xFF00];} // c + FF00 (I/) ports)
-		void Ld_A_BC(uint16_t) {_register.a = _memory[_register.pc + _register.bc];}
-		void Ld_A_De(uint16_t) { _register.a = _memory[_register.pc + _register.de];}
+		void Ld_A_BC(uint16_t) {_register.a = _memory[_register.bc];}
+		void Ld_A_De(uint16_t) { _register.a = _memory[_register.de];}
 		void Ld_A_Hln(uint16_t) {_register.a = _memory[_register.hl]; _register.hl--;}
 		void Ld_A_Hlpp(uint16_t) {_register.a = _memory[_register.hl]; _register.hl++;}
 		void Ld_A_Hlp(uint16_t) {_register.a = _memory[_register.hl];}
 
-		void Ld_B(uint16_t)   {_register.b = _memory[_register.pc];};
+		void Ld_B(uint16_t arg) {_register.b = arg;};
 		void Ld_B_B(uint16_t) {_register.b = _register.b;}
 		void Ld_B_C(uint16_t) {_register.b = _register.c;}
 		void Ld_B_D(uint16_t) {_register.b = _register.d;}
@@ -367,7 +366,7 @@ namespace emulator
 		void Ld_H_Hlp(uint16_t) {_register.h = _memory[_register.hl];}
 		void Ld_H_A(uint16_t) {_register.h = _register.a;}
 
-
+		void Ld_L(uint16_t arg) {_register.l = arg;}
 		void Ld_L_B(uint16_t)   {_register.l = _register.b;}
 		void Ld_L_C(uint16_t)   {_register.l = _register.c;}
 		void Ld_L_D(uint16_t)   {_register.l = _register.d;}

@@ -120,8 +120,11 @@ std::ostream &operator<<(std::ostream &os, emulator::Memory::GpuRegister &reg)
 	os << "begin display Y: " << (int)reg.beginDisplay.y << std::endl;
 	os << "line " << (int)reg.line << std::endl;
 	os << "bg palette " << std::bitset<8>(reg.getPalette()) << std::endl;
+	os << "bg palette " << (int)reg.getPalette() << std::endl;
 	os << "bg control " << std::bitset<8>(reg.getControl()) << std::endl;
+	os << "bg control " << (int)reg.getControl() << std::endl;
 	os << "bg status " << std::bitset<8>(reg.getStatus()) << std::endl;
+	os << "bg status " << (int)reg.getStatus() << std::endl;
 	for (int i = 0; i < 4; i++) {
 		std::cout << "Color " << i << ": " << (int)reg.getPalette(i) << std::endl;
 	}

@@ -38,9 +38,10 @@ void emulator::Cpu::readInstruction()
 	auto tmp = _register.pc;
 	bool readline = false;
 
-	if (_register.pc >= 0x100)
+	if (_register.pc == 0x1b0)
 		readline = true;
 
+	_register.t = 0;
 	_register.m = 0;
 	if (managedInstruction[_memory[_register.pc]]._length == 2) {
 		cData = _memory[_register.pc + 1];
@@ -65,10 +66,10 @@ void emulator::Cpu::readInstruction()
 		std::cout << std::hex << _memory.getGpuRegister() << std::endl;
 		std::cout << "y: " << (_memory.getGpuRegister().getDisplay().y / 8) << std::endl;
 		std::cout << "x: " << (_memory.getGpuRegister().getDisplay().x / 8) << std::endl;
-		_memory.dumpMemory(0x9800, 0x9BFF);
-		std::cout << std::endl;
-		_memory.dumpMemory(0x8000, 0x8000 + 256 * 16);
-		getline(std::cin, input_line);
+//		_memory.dumpMemory(0x9800, 0x9BFF);
+//		std::cout << std::endl;
+//		_memory.dumpMemory(0x8000, 0x8000 + 256 * 16);
+//		getline(std::cin, input_line);
 	}
 }
 
@@ -80,7 +81,7 @@ std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos
 
 std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction = {
 	{"NOP", 1, &Cpu::Nop, 1}, /* 0x00 */
-	{"LD BC, d16", 3, &Cpu::Ld_BC, 3},
+	{"LD BC, ction Findd16", 3, &Cpu::Ld_BC, 3},
 	{"LD (BC), A", 1, &Cpu::Ld_BC_A, 2},
 	{"INC BC", 1, &Cpu::Inc_BC, 2},
 	{"INC B", 1, &Cpu::Inc_B, 1},

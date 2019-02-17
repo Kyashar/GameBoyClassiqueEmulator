@@ -48,7 +48,7 @@ namespace gfx {
 		int getAddressFromTile(int tileNB, int line);
 
 //		void setSpriteSet();
-		sf::Color getColorFromAddress(int value, unsigned char bit);
+		sf::Color getColorFromAddress(int value, unsigned char bit, unsigned char x);
 
 		std::unique_ptr<sf::RenderWindow> _window;
 

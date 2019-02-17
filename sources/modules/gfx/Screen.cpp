@@ -128,11 +128,13 @@ void gfx::Screen::renderLine()
 	_clock = 0;
 	_mode = 0;
 
+	if (_memory.getGpuRegister().sprite())
+		exit(84);
 	// Which line of tiles to use in the map
 	addr += (((_memory.getGpuRegister().getLine() + _memory.getGpuRegister().getDisplay().y) & 255)/ 8) * 32;
 	lineoffs = _memory.getGpuRegister().getDisplay().x / 8;
 
-	// get addr from tile for line and index
+	// Where to begin in the tile
 	x = _memory.getGpuRegister().getDisplay().x % 8;
 	y = ((_memory.getGpuRegister().getLine() + _memory.getGpuRegister().getDisplay().y) & 255) % 8;
 	bit = (128 >> x);
@@ -140,15 +142,20 @@ void gfx::Screen::renderLine()
 	tileNumber = _memory[addr + lineoffs];
 	tileAdrresse = getAddressFromTile(tileNumber, y);
 	for (size_t i = 0; i < 160; i++) {
-		operator[](_memory.getGpuRegister().getLine())[i].color = getColorFromAddress(tileAdrresse, bit);
+		operator[](_memory.getGpuRegister().getLine())[i].color = getColorFromAddress(tileAdrresse, bit, x);
 		bit >>= 1;
 		x++;
 		if (x == 8)  {
 			x = 0;
 			bit = 128;
-			lineoffs = (lineoffs + 1) & 31;
+			lineoffs = (lineoffs + 1) % 32;
 			tileNumber = _memory[addr + lineoffs];
 			tileAdrresse = getAddressFromTile(tileNumber, y);
+			if (tileNumber != 0) {
+				std::cout << std::dec << (int) tileNumber << std::endl;
+				std::cout << std::hex << 0x8000 + (tileNumber * 8 * 2)
+					  << std::endl;
+			}
 		}
 		if (bit == 0 || x > 8)
 			exit(84);
@@ -162,9 +169,9 @@ int gfx::Screen::getAddressFromTile(int tileNb, int line)
 	return 0x8000 + (tileNb * 8 * 2) + (line * 2);
 }
 
-sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit)
+sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit, unsigned  char x)
 {
-	int value = (_memory[address] & bit) + (_memory[address + 1] & bit);
+	int value = ((_memory[address] & bit) >> (7 - x)) + (((_memory[address + 1] & bit)) >> (7 - x));
 
 	if (0 == _memory.getGpuRegister().getPalette(value))
 		return sf::Color(255, 255, 255);

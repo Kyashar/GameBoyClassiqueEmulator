@@ -59,7 +59,7 @@ namespace emulator
 				if (address == 0xFF43)
 					return beginDisplay.x;
 				if (address == 0xFF44)
-					return (line >= 0x90) ? o: line;
+					return line;
 				if (address == 0xFF45)
 				 	return cmpline;
 				if (address == 0xFF47)
@@ -78,7 +78,7 @@ namespace emulator
 			}
 
 			bool background() {return gpuControl & 0b1;}
-			bool sprite() {return gpuControl & 0b10;}
+			bool sprite() {return gpuControl & 0b100;}
 			sf::Vector2<unsigned char> spriteSize() {return gpuControl & 0b100 ? sf::Vector2<unsigned char>(8, 8) : sf::Vector2<unsigned char>(8, 16);}
 			bool bgTileMap() {return gpuControl & 0b1000;}
 			bool bgTileSet() {return gpuControl & 0b10000;}
