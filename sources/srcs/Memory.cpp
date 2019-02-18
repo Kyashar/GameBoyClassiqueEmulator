@@ -79,7 +79,6 @@ uint8_t &emulator::Memory::operator[](int addr)
 			if (addr < 0x0100) {
 				return _bios[addr];
 			} else {
-				std::cerr << "end bios" << std::endl;
 				std::cout << "end bios" << std::endl;
 				_biosReaded = true;
 			}
@@ -110,10 +109,6 @@ uint8_t &emulator::Memory::operator[](int addr)
 		return zero; // sound system
 	else if (addr < 0xFF40)
 		return zero;
-	else if (addr == 0xFF46) {
-		std::cout << "Transfert protocole" << std::endl;
-		return zero;
-	}
 	else if (addr < 0xFF4C)
 		return _registerGpu[addr];
 	else if (addr < 0xFF80)

@@ -65,7 +65,6 @@ void gfx::Screen::put(size_t timer)
 	else if (_mode == 3) {
 		renderLine();
 	}
-	updateKeyPressed();
 }
 
 /**

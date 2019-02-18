@@ -62,6 +62,10 @@ namespace emulator
 					return line;
 				if (address == 0xFF45)
 				 	return cmpline;
+				if (address == 0xFF46) {
+					std::cout << "Transfert protocole" << std::endl;
+					return zero;
+				}
 				if (address == 0xFF47)
 					return bgPalette;
 				if (address == 0xFF48)

@@ -49,6 +49,7 @@ void emulator::Cpu::readInstruction()
 	if (tmp == _register.pc)
 		_register.pc += managedInstruction[_memory[tmp]]._length;
 	_gpu.put(_register.t);
+	_gpu.updateKeyPressed();
 }
 
 std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos &infos)

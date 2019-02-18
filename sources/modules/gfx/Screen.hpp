@@ -39,6 +39,7 @@ namespace gfx {
 		}
 		void initWindow();
 		void put(size_t timer);
+		void updateKeyPressed();
 	private:
 		void resetScreen();
 		void Hblank();
@@ -48,7 +49,6 @@ namespace gfx {
 		void renderLine();
 		void renderLineSprite();
 		int getAddressFromTile(int tileNB, int line);
-		void updateKeyPressed();
 
 		sf::Color getColorFromAddress(int address, unsigned char bit, unsigned char x);
 		sf::Color getColorFromAddress(int address, unsigned char bit, unsigned  char x, char spriteOptions);
