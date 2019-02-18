@@ -44,11 +44,14 @@ namespace gfx {
 		void Hblank();
 		void Vblank();
 		void ObjectRead();
-		void renderLine();
-		int getAddressFromTile(int tileNB, int line);
 
-//		void setSpriteSet();
-		sf::Color getColorFromAddress(int value, unsigned char bit, unsigned char x);
+		void renderLine();
+		void renderLineSprite();
+		int getAddressFromTile(int tileNB, int line);
+		void updateKeyPressed();
+
+		sf::Color getColorFromAddress(int address, unsigned char bit, unsigned char x);
+		sf::Color getColorFromAddress(int address, unsigned char bit, unsigned  char x, char spriteOptions);
 
 		std::unique_ptr<sf::RenderWindow> _window;
 

@@ -40,7 +40,6 @@ namespace emulator
 		 * Read instruction and call the right function
 		 */
 		void readInstruction();
-		void disassemblyRom();
 
 	private:
 		static std::vector<instructionInfos> managedInstruction;

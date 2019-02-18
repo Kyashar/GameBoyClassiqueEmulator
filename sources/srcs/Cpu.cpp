@@ -26,32 +26,21 @@ bool emulator::Cpu::gotSomethingToRead() const
 	return _read;
 }
 
-void emulator::Cpu::disassemblyRom()
-{
-	auto rom = _memory.getRom();
-}
-
 void emulator::Cpu::readInstruction()
 {
 	uint8_t cData = 0;
 	uint16_t sData = 0;
 	auto tmp = _register.pc;
-	bool readline = false;
-
-	if (_register.pc == 0x1b0)
-		readline = true;
 
 	_register.t = 0;
 	_register.m = 0;
+
 	if (managedInstruction[_memory[_register.pc]]._length == 2) {
 		cData = _memory[_register.pc + 1];
 		sData = cData;
-	} else if (managedInstruction[_memory[_register.pc]]._length == 3)
+	} else if (managedInstruction[_memory[_register.pc]]._length == 3) {
 		sData = _memory.getShort(_register.pc + 1);
-	if (readline)
-		std::cout << managedInstruction[_memory[_register.pc]]._name << std::endl;
-	if (managedInstruction[_memory[tmp]]._length > 1 && readline)
-		std::cout << std::hex << "args :" << sData << std::endl;
+	}
 
 	_register.t += managedInstruction[_memory[_register.pc]]._timer;
 	_register.m = _register.t * 4;
@@ -60,17 +49,6 @@ void emulator::Cpu::readInstruction()
 	if (tmp == _register.pc)
 		_register.pc += managedInstruction[_memory[tmp]]._length;
 	_gpu.put(_register.t);
-	std::string input_line;
-	if (readline) {
-		std::cout << std::hex << _register << std::endl;
-		std::cout << std::hex << _memory.getGpuRegister() << std::endl;
-		std::cout << "y: " << (_memory.getGpuRegister().getDisplay().y / 8) << std::endl;
-		std::cout << "x: " << (_memory.getGpuRegister().getDisplay().x / 8) << std::endl;
-//		_memory.dumpMemory(0x9800, 0x9BFF);
-//		std::cout << std::endl;
-//		_memory.dumpMemory(0x8000, 0x8000 + 256 * 16);
-//		getline(std::cin, input_line);
-	}
 }
 
 std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos &infos)

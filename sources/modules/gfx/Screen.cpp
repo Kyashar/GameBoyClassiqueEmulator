@@ -5,6 +5,7 @@
 **      Made on 2019/01 by ebernard
 */
 
+#include <SFML/Window/Keyboard.hpp>
 #include "Screen.hpp"
 
 gfx::Screen::Screen(emulator::Memory &mem) :
@@ -64,6 +65,7 @@ void gfx::Screen::put(size_t timer)
 	else if (_mode == 3) {
 		renderLine();
 	}
+	updateKeyPressed();
 }
 
 /**
@@ -151,14 +153,42 @@ void gfx::Screen::renderLine()
 			lineoffs = (lineoffs + 1) % 32;
 			tileNumber = _memory[addr + lineoffs];
 			tileAdrresse = getAddressFromTile(tileNumber, y);
-			if (tileNumber != 0) {
-				std::cout << std::dec << (int) tileNumber << std::endl;
-				std::cout << std::hex << 0x8000 + (tileNumber * 8 * 2)
-					  << std::endl;
-			}
 		}
 		if (bit == 0 || x > 8)
 			exit(84);
+	}
+	renderLineSprite();
+}
+
+void gfx::Screen::renderLineSprite()
+{
+	sf::Vector2i cord;
+	uint8_t tileNumber;
+	uint8_t options;
+	int x;
+	int bit;
+	int tileAdrresse;
+
+	for (int i = 0; i < 40; i++){
+		cord.y = _memory[0xFE00 + i * 4];
+		cord.x = _memory[0xFE00 + i * 4 + 1];
+		tileNumber = _memory[0xFE00 + i * 4 + 2];
+		options =  _memory[0xFE00 + i * 4 + 3];
+
+		if ((cord.y > _memory.getGpuRegister().getLine() || (cord.y + 8) <= _memory.getGpuRegister().getLine()) || !((options & 0b10000000) >> 7))
+			continue ;
+//		std::cout << "sprite nb: " << std::dec  << i << std::endl;
+//		std::cout << "tile nb: " << std::dec << (int)tileNumber << std::endl;
+//		std::cout << (int)cord.x << std::endl;
+//		std::cout << (int)cord.y << std::endl;
+//		std::cout << std::endl;
+
+		tileAdrresse = getAddressFromTile(tileNumber, _memory.getGpuRegister().getLine() - cord.y);
+		bit = 128;
+		for (size_t i = 0; i < 8; i++) {
+			operator[](_memory.getGpuRegister().getLine())[i + cord. x].color = getColorFromAddress(tileAdrresse, bit, i, options);
+			bit >>= 1;
+		}
 	}
 }
 
@@ -167,6 +197,20 @@ int gfx::Screen::getAddressFromTile(int tileNb, int line)
 	if (!_memory.getGpuRegister().bgTileSet())
 		tileNb += 256;
 	return 0x8000 + (tileNb * 8 * 2) + (line * 2);
+}
+
+sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit, unsigned  char x, char spriteOptions)
+{
+	int value = ((_memory[address] & bit) >> (7 - x)) + (((_memory[address + 1] & bit)) >> (7 - x));
+	auto palette = (spriteOptions & 0b10000) >> 4;
+
+	if (0 == _memory.getGpuRegister().getPalette(value, palette))
+		return sf::Color(255, 255, 255);
+	if (1 == _memory.getGpuRegister().getPalette(value, palette))
+		return sf::Color(192, 192, 192);
+	if (2 == _memory.getGpuRegister().getPalette(value, palette))
+		return sf::Color(96, 96, 96);
+	return sf::Color(0, 0, 0);
 }
 
 sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit, unsigned  char x)
@@ -181,3 +225,23 @@ sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit, unsig
 		return sf::Color(96, 96, 96);
 	return sf::Color(0, 0, 0);
 }
+
+#include <bitset>
+
+void gfx::Screen::updateKeyPressed()
+{
+	_memory[0xFF00] &= 0b00111111;
+
+	if ((_memory[0xFF00] & 0b00010000) >> 4) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) _memory[0xFF00] &= 0b00110111; else _memory[0xFF00] |= 0b00001000;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) _memory[0xFF00] &= 0b00111011; else _memory[0xFF00] |= 0b00000100;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) _memory[0xFF00] &= 0b00111101; else _memory[0xFF00] |= 0b00000010;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) _memory[0xFF00] &= 0b00111110; else _memory[0xFF00] |= 0b00000001;
+	} else if ((_memory[0xFF00] & 0b00100000) >> 5){
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::K)) _memory[0xFF00] &= 0b00110111; else _memory[0xFF00] |= 0b00001000;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) _memory[0xFF00] &= 0b00111011; else _memory[0xFF00] |= 0b00000100;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) _memory[0xFF00] &= 0b00111101; else _memory[0xFF00] |= 0b00000010;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::O)) _memory[0xFF00] &= 0b00111110; else _memory[0xFF00] |= 0b00000001;
+	}
+}
+

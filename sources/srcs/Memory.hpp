@@ -46,8 +46,8 @@ namespace emulator
 	{
 	public:
 		struct GpuRegister {
-			GpuRegister() : gpuControl(0), gpuStatus(2), beginDisplay(0, 0), line(0), bgPalette(0) {}
-			GpuRegister(sf::Vector2u &display, unsigned int &l) : gpuControl(0), beginDisplay(display), line(l), bgPalette(0) {}
+			GpuRegister() : gpuControl(0), gpuStatus(2), bgBeginDisplay(0, 0), line(0), bgPalette(0) {}
+			GpuRegister(sf::Vector2u &display, unsigned int &l) : gpuControl(0), bgBeginDisplay(display), line(l), bgPalette(0) {}
 			uint8_t &operator[](size_t address) {
 				zero = 0;
 				if (address == 0xFF40)
@@ -55,27 +55,41 @@ namespace emulator
 				if (address == 0xFF41)
 					return gpuStatus;
 				if (address == 0xFF42)
-					return beginDisplay.y;
+					return bgBeginDisplay.y;
 				if (address == 0xFF43)
-					return beginDisplay.x;
+					return bgBeginDisplay.x;
 				if (address == 0xFF44)
 					return line;
 				if (address == 0xFF45)
 				 	return cmpline;
 				if (address == 0xFF47)
 					return bgPalette;
+				if (address == 0xFF48)
+					return spritePalette0;
+				if (address == 0xFF49)
+					return spritePalette1;
+				if (address == 0xFF4A)
+					return windowBeginDisplay.y;
+				if (address == 0xFF4B)
+					return windowBeginDisplay.x;
 				std::cout << "ERROR: " << address << std::endl;
 				return zero;
 			}
 			unsigned char &getStatus() {return gpuStatus;}
 			unsigned char &getControl() {return gpuControl;}
-			sf::Vector2<unsigned char> &getDisplay() {return beginDisplay;}
+			sf::Vector2<unsigned char> &getDisplay() {return bgBeginDisplay;}
 			unsigned char &getLine() {return line;}
 			unsigned char &getPalette() {return bgPalette;}
 			unsigned char getPalette(unsigned int index) {
 				unsigned char masque = 0b11;
 				return (bgPalette & (masque << (index * 2))) >> (index * 2);
 			}
+			unsigned char &getSpritePalette(bool index) {return index ? spritePalette1 :  spritePalette0;}
+			unsigned char getPalette(unsigned int index, bool sprite) {
+				unsigned char masque = 0b11;
+				return ((sprite ? spritePalette1 : spritePalette0) & (masque << (index * 2))) >> (index * 2);
+			}
+
 
 			bool background() {return gpuControl & 0b1;}
 			bool sprite() {return gpuControl & 0b100;}
@@ -93,12 +107,14 @@ namespace emulator
 
 			unsigned char gpuControl;
 			unsigned char gpuStatus;
-			sf::Vector2<unsigned char> beginDisplay;
+			sf::Vector2<unsigned char> bgBeginDisplay;
+			sf::Vector2<unsigned char> windowBeginDisplay;
 			unsigned char line;
 			unsigned char cmpline;
 			unsigned char bgPalette;
+			unsigned char spritePalette0;
+			unsigned char spritePalette1;
 			unsigned char zero;
-			unsigned char o = 0x90;
 		};
 
 		Memory();
@@ -130,6 +146,8 @@ namespace emulator
 
 		std::array<uint8_t, 8192> _wram; 	// working ram
 		std::array<uint8_t, 160> _oam;
+		uint8_t _key; 				// key register 0xFF00
+
 		// memory mapped I/O 		  -> std::array<uint8_t, 128>
 		std::array<uint8_t, 128> _zram;
 	};

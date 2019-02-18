@@ -7,6 +7,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <bitset>
 #include "Memory.hpp"
 
 emulator::Memory::Memory()  : _biosReaded(false),
@@ -26,7 +27,7 @@ emulator::Memory::Memory()  : _biosReaded(false),
 				    0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E, 0x3c, 0x42, 0xB9, 0xA5, 0xB9, 0xA5, 0x42, 0x4C,
 				    0x21, 0x04, 0x01, 0x11, 0xA8, 0x00, 0x1A, 0x13, 0xBE, 0x20, 0xFE, 0x23, 0x7D, 0xFE, 0x34, 0x20,
 				    0xF5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xFB, 0x86, 0x20, 0xFE, 0x3E, 0x01, 0xE0, 0x50},
-			      _rom(), _vram(), _eram(), _wram(), _oam(), _zram()
+			      _rom(), _vram(), _eram(), _wram(), _oam(), _key(0), _zram()
 {
 
 }
@@ -101,23 +102,31 @@ uint8_t &emulator::Memory::operator[](int addr)
 		return _oam[((unsigned int)addr) & ((unsigned int)0xFF)];
 	else if (addr < 0xFF00)		// unsabel memory
 		return zero;
+	else if (addr == 0xFF00)        // IO register
+		return _key;
+	else if (addr < 0xFF10)
+		return zero; // timer
+	else if (addr < 0xFF27)
+		return zero; // sound system
 	else if (addr < 0xFF40)
 		return zero;
+	else if (addr == 0xFF46) {
+		std::cout << "Transfert protocole" << std::endl;
+		return zero;
+	}
 	else if (addr < 0xFF4C)
 		return _registerGpu[addr];
-	else if (addr < 0xFF80)		// IO register
+	else if (addr < 0xFF80)
 		return zero;
 	else if (addr < 0xFFFF)		// zero page
 		return _oam[((unsigned int)addr) & ((unsigned int)0x7F)];
 	return zero;
 }
 
-#include <bitset>
-
 std::ostream &operator<<(std::ostream &os, emulator::Memory::GpuRegister &reg)
 {
-	os << "begin display X: " << (int)reg.beginDisplay.x << std::endl;
-	os << "begin display Y: " << (int)reg.beginDisplay.y << std::endl;
+	os << "begin display X: " << (int)reg.bgBeginDisplay.x << std::endl;
+	os << "begin display Y: " << (int)reg.bgBeginDisplay.y << std::endl;
 	os << "line " << (int)reg.line << std::endl;
 	os << "bg palette " << std::bitset<8>(reg.getPalette()) << std::endl;
 	os << "bg palette " << (int)reg.getPalette() << std::endl;
