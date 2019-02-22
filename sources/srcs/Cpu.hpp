@@ -40,7 +40,6 @@ namespace emulator
 		 * Read instruction and call the right function
 		 */
 		void readInstruction();
-
 	private:
 		static std::vector<instructionInfos> managedInstruction;
 		static std::vector<prefixInfos> prefixInstruction;
@@ -102,8 +101,8 @@ namespace emulator
 		void Prefix_Cb(uint16_t arg) {(*this.*prefixInstruction[arg]._instruction)();}  /* Call Prefix CB */
 
 		void Cpl(uint16_t) {_register.a = ~_register.a; _register.setFlagN(true); _register.setFlagH(true);}
-		void Scf(uint16_t) {}
-		void Ccf(uint16_t) {}
+		void Scf(uint16_t) {_register.f = 0x10 + (_register.f & 0b10000000);}
+		void Ccf(uint16_t) {_register.f = (_register.f & 0x10 ? 0x00 : 0x10) + (_register.f & 0b10000000);}
 
 		void Nop(uint16_t) {}//std::cout << "DO nothing" << std::endl;}
 		void Stop(uint16_t arg) { std::cout << "STOP: " << arg << std::endl << "enter slow mode, what to do ?" << arg << std::endl;_memory.dumpMemory(0x8000, 0x9FFF);}
@@ -262,9 +261,9 @@ namespace emulator
 		void Pop_Bc(uint16_t) {_register.bc = this->popStack();}
 
 		void Ret(uint16_t)    {_register.pc = this->revPopStack();}
-		void Ret_Nz(uint16_t) {if (!_register.getFlagZ()) _register.pc = this->revPopStack(); else _register.m -= 1;}
+		void Ret_Nz(uint16_t) {if (!_register.getFlagZ()) _register.pc = this->revPopStack(); else _register.m -= 3;}
 		void Ret_Nc(uint16_t) {if (!_register.getFlagC()) _register.pc = this->revPopStack(); else _register.m -= 3;}
-		void Ret_Z(uint16_t)  {if (_register.getFlagZ())  _register.pc = this->revPopStack(); else _register.m -= 1;}
+		void Ret_Z(uint16_t)  {if (_register.getFlagZ())  _register.pc = this->revPopStack(); else _register.m -= 3;}
 		void Ret_C(uint16_t)  {if (_register.getFlagC())  _register.pc = this->revPopStack(); else _register.m -= 3;}
 
 		void Jp(uint16_t arg)    {_register.pc = arg;}

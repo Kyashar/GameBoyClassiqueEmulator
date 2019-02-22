@@ -9,6 +9,7 @@
 #define EMULATOR_GAMEBOY_SCREEN_HPP
 
 #include <iostream>
+#include <SFML/Window/Event.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include "../../srcs/Memory.hpp"
 
@@ -37,6 +38,7 @@ namespace gfx {
 		ScreenLine operator[](size_t height) {
 			return ScreenLine(_pixels, height);
 		}
+		void setMemory(emulator::Memory &mem){_memory = mem;}
 		void initWindow();
 		void put(size_t timer);
 		void updateKeyPressed();
@@ -50,14 +52,19 @@ namespace gfx {
 		void renderLineSprite();
 		int getAddressFromTile(int tileNB, int line);
 
+		void crossKeysEvent();
+
 		sf::Color getColorFromAddress(int address, unsigned char bit, unsigned char x);
 		sf::Color getColorFromAddress(int address, unsigned char bit, unsigned  char x, char spriteOptions);
 
 		std::unique_ptr<sf::RenderWindow> _window;
+		sf::Event _event;
 
 		emulator::Memory &_memory;
+		emulator::Memory::GpuRegister &_register;
 		std::array<sf::Vertex, 23040> _pixels;
 
+		size_t _vBlank;
 		size_t _clock;
 		char _mode;
 	};

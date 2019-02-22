@@ -6,5 +6,5 @@ add_library(gfx SHARED gfx/Screen.cpp gfx/Screen.hpp)
 
 
 target_link_libraries(gfx PRIVATE sfml-audio sfml-system sfml-graphics sfml-window)
-add_compile_options(-g3)
-target_compile_options(gfx PRIVATE -g3)
+target_compile_options(gfx PRIVATE -o2)
+target_compile_options(read_rom PRIVATE -o2)

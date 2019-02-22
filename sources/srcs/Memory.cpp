@@ -27,7 +27,7 @@ emulator::Memory::Memory()  : _biosReaded(false),
 				    0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E, 0x3c, 0x42, 0xB9, 0xA5, 0xB9, 0xA5, 0x42, 0x4C,
 				    0x21, 0x04, 0x01, 0x11, 0xA8, 0x00, 0x1A, 0x13, 0xBE, 0x20, 0xFE, 0x23, 0x7D, 0xFE, 0x34, 0x20,
 				    0xF5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xFB, 0x86, 0x20, 0xFE, 0x3E, 0x01, 0xE0, 0x50},
-			      _rom(), _vram(), _eram(), _wram(), _oam(), _key(0), _zram()
+			      _rom(), _vram(), _eram(), _wram(), _oam(), _key(0b00111111), _zram()
 {
 
 }
@@ -86,9 +86,8 @@ uint8_t &emulator::Memory::operator[](int addr)
 //		dumpMemory(0x9800, 0x9FFF);
 		return _rom[addr];
 	}
-	else if (addr < 0x8000) {        // ROM
+	else if (addr < 0x8000)        // ROM
 		return _rom[addr];
-	}
 	else if (addr < 0xA000)		// VRAM
 		return _vram[((unsigned int)addr) & ((unsigned int)0x1FFF)];
 	else if (addr < 0xC000)		// ERAM
@@ -101,8 +100,10 @@ uint8_t &emulator::Memory::operator[](int addr)
 		return _oam[((unsigned int)addr) & ((unsigned int)0xFF)];
 	else if (addr < 0xFF00)		// unsabel memory
 		return zero;
-	else if (addr == 0xFF00)        // IO register
+	else if (addr == 0xFF00) {        // IO register
+		std::cout << std::bitset<8>(_key) << std::endl;
 		return _key;
+	}
 	else if (addr < 0xFF10)
 		return zero; // timer
 	else if (addr < 0xFF27)

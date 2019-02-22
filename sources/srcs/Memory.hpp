@@ -46,7 +46,7 @@ namespace emulator
 	{
 	public:
 		struct GpuRegister {
-			GpuRegister() : gpuControl(0), gpuStatus(2), bgBeginDisplay(0, 0), line(0), bgPalette(0) {}
+			explicit GpuRegister() : gpuControl(0), gpuStatus(2), bgBeginDisplay(0, 0), line(0), bgPalette(0) {}
 			GpuRegister(sf::Vector2u &display, unsigned int &l) : gpuControl(0), bgBeginDisplay(display), line(l), bgPalette(0) {}
 			uint8_t &operator[](size_t address) {
 				zero = 0;
@@ -128,12 +128,9 @@ namespace emulator
 		uint16_t getShort(int index);
 		void setShort(int index, uint16_t value);
 		void dumpMemory(int begin, int end);
-		std::array<uint8_t, 32768> getRom() {return _rom;}
 
-		GpuRegister  &getGpuRegister() {return _registerGpu;}
+		GpuRegister &getGpuRegister() {return _registerGpu;}
 		uint8_t &operator[](int index);
-	private:
-//		std::array<uint8_t , 65536> _memory;
 
 		uint8_t zero = 0;
 		bool _biosReaded;

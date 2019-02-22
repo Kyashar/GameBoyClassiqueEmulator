@@ -11,8 +11,9 @@
 
 emulator::Cpu::Cpu(std::vector<uint8_t> &instructions) :
 	_register{{{{0, 0}}}, {{{0, 0}}}, {{{0, 0}}}, {{{0, 0}}}, {{{0, 0}}}, 0, 0},
-	_timer{0, 0}, _gpu(_memory), _read(true)
+	_timer{0, 0}, _memory(), _gpu(_memory), _read(true)
 {
+	_gpu.setMemory(_memory);
 	_register.pc = 0;
 	_register.sp = 0;
 	_memory.loadRom(instructions);
@@ -26,30 +27,38 @@ bool emulator::Cpu::gotSomethingToRead() const
 	return _read;
 }
 
+#include <bitset>
+
 void emulator::Cpu::readInstruction()
 {
 	uint8_t cData = 0;
 	uint16_t sData = 0;
+
 	auto tmp = _register.pc;
+	auto instruction = managedInstruction[_memory[_register.pc]];
+	auto key = _memory._key;
 
-	_register.t = 0;
 	_register.m = 0;
-
-	if (managedInstruction[_memory[_register.pc]]._length == 2) {
+	_register.t = 0;
+	if (instruction._length == 2) {
 		cData = _memory[_register.pc + 1];
 		sData = cData;
-	} else if (managedInstruction[_memory[_register.pc]]._length == 3) {
+	} else if (instruction._length == 3)
 		sData = _memory.getShort(_register.pc + 1);
-	}
 
-	_register.t += managedInstruction[_memory[_register.pc]]._timer;
-	_register.m = _register.t * 4;
-	(*this.*managedInstruction[_memory[_register.pc]]._instruction)(sData);
+	(*this.*instruction._instruction)(sData);
+	_register.m += instruction._timer;
+	_register.t = _register.m * 4;
 
 	if (tmp == _register.pc)
-		_register.pc += managedInstruction[_memory[tmp]]._length;
+		_register.pc += instruction._length;
+	if (key != _memory._key) {
+		_memory._key |= 0b00001111;
+	}
 	_gpu.put(_register.t);
-	_gpu.updateKeyPressed();
+	if ((_memory._key & 0b00110000) >> 4) {
+		_gpu.updateKeyPressed();
+	}
 }
 
 std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos &infos)
@@ -263,7 +272,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"CP (HL)", 1, &Cpu::Cp_Hlp, 2},
 	{"CP A", 1, &Cpu::Cp_A, 1},
 
-	{"RET NZ", 1, &Cpu::Ret_Nz, 5}, //8  /* 0xC0 */
+	{"RET NZ", 1, &Cpu::Ret_Nz, 5}, //2  /* 0xC0 */
 	{"POP BC", 1, &Cpu::Pop_Bc, 3},
 	{"JP NZ, a16", 3, &Cpu::Jp_Nz, 4},//3
 	{"JP a16", 3, &Cpu::Jp, 4},
@@ -271,7 +280,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"PUSH BC", 1, &Cpu::Push_Bc, 4},
 	{"ADD  A,d8", 2, &Cpu::Add_A, 2},
 	{"RST 00H", 1, &Cpu::Rst_00H, 4},
-	{"RET Z", 1, &Cpu::Ret_Z, 4}, // 2
+	{"RET Z", 1, &Cpu::Ret_Z, 5}, // 2
 	{"RET", 1, &Cpu::Ret, 4},
 	{"JP Z, a16", 3, &Cpu::Jp_Z, 4}, //3
 	{"PREFIX CB", 2, &Cpu::Prefix_Cb, 1},
