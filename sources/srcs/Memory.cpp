@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <bitset>
+#include <SFML/Window/Keyboard.hpp>
 #include "Memory.hpp"
 
 emulator::Memory::Memory()  : _biosReaded(false),
@@ -70,6 +71,7 @@ void emulator::Memory::dumpMemory(int begin, int end)
 
 uint8_t &emulator::Memory::operator[](int addr)
 {
+	zero = 0;
 	if (addr > 0xFFFF || addr < 0)
 		throw std::runtime_error("not mapped address");
 
@@ -101,11 +103,14 @@ uint8_t &emulator::Memory::operator[](int addr)
 	else if (addr < 0xFF00)		// unsabel memory
 		return zero;
 	else if (addr == 0xFF00) {        // IO register
-		std::cout << std::bitset<8>(_key) << std::endl;
+		updateKeyPressed(_key);
+//		std::cout << std::bitset<8>(_key) << std::endl;
 		return _key;
 	}
 	else if (addr < 0xFF10)
 		return zero; // timer
+	else if (addr == 0xFF0F)
+		return _getInterrupt;
 	else if (addr < 0xFF27)
 		return zero; // sound system
 	else if (addr < 0xFF40)
@@ -116,7 +121,34 @@ uint8_t &emulator::Memory::operator[](int addr)
 		return zero;
 	else if (addr < 0xFFFF)		// zero page
 		return _oam[((unsigned int)addr) & ((unsigned int)0x7F)];
+	else if (addr == 0xFFFF)
+		return _interrupt;
 	return zero;
+}
+
+void updateKeyPressed(uint8_t &key)
+{
+	key = (key & 0b00110000) + 0b00001111;
+
+	if ((key & 0b00010000) >> 4) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+			key &= 0b00110111;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+			key &= 0b00111011;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+			key &= 0b00111101;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+			key &= 0b00111110;
+	} else if ((key & 0b00100000) >> 5) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::O))
+			key &= 0b00110111;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::P))
+			key &= 0b00111011;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
+			key &= 0b00111101;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L))
+			key &= 0b00111110;
+	}
 }
 
 std::ostream &operator<<(std::ostream &os, emulator::Memory::GpuRegister &reg)

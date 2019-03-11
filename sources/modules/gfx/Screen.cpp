@@ -10,7 +10,7 @@
 #include "Screen.hpp"
 
 gfx::Screen::Screen(emulator::Memory &mem) :
-	_memory(mem), _register(mem.getGpuRegister()), _vBlank(0), _clock(0), _mode(0)
+	_memory(mem), _register(mem._registerGpu), _vBlank(0), _clock(0), _mode(0), tmp(0b11)
 {
 	sf::Vector2f pos = {0, 1};
 
@@ -57,6 +57,14 @@ void gfx::Screen::put(size_t timer)
 {
 	_clock += timer;
 
+	if (_register.gpuInterupt != tmp) {
+		_register.gpuStatus = _register.gpuInterupt;
+		_register.gpuInterupt = tmp;
+	} else if (_register.getInter) {
+		_register.getInter = false;
+	}
+
+
 	if (_mode == 0)
 		Hblank();
 	else if (_mode == 1)
@@ -65,6 +73,14 @@ void gfx::Screen::put(size_t timer)
 		ObjectRead();
 	else if (_mode == 3) {
 		renderLine();
+	}
+
+	tmp &= ~(0b11);
+	tmp |= _mode;
+	_register.gpuInterupt = tmp;
+	if (_register.cmpline == _register.line) {
+		_register.gpuInterupt |= 0b100;
+		_register.gpuInterupt |= 0b1000000;
 	}
 }
 
@@ -80,9 +96,18 @@ void gfx::Screen::Hblank()
 	_clock = 0;
 
 	if (_register.line == 143) {
+
+		if (_register.gpuStatus & 2) {
+			_register.gpuInterupt |= 0b10000;
+			_memory._getInterrupt |= 2;
+		}
 		_register.line++;
 		_mode = 1;
 	} else {
+		if (_register.gpuStatus & 4) {
+			_register.gpuInterupt |= 0b1000000;
+			_memory._getInterrupt |= 2;
+		}
 		_mode = 2;
 	}
 }
@@ -97,10 +122,14 @@ void gfx::Screen::Vblank()
 		return ;
 	_clock = 0;
 	_vBlank++;
-	if (_vBlank > 9) {
+	_register.line++;
+//	if (_vBlank > 9) {
+	if (_register.line > 153) {
 		_mode = 2;
 		_register.line = 0;
 		_vBlank = 0;
+		if (_register.gpuStatus & 0b1000)
+			tmp |= 0b1000;
 		_window->clear(sf::Color::Red);
 		_window->draw(_pixels.data(), _pixels.size(), sf::Points);
 		_window->display();
@@ -130,6 +159,10 @@ void gfx::Screen::renderLine()
 	_clock = 0;
 	_mode = 0;
 
+	if (_register.gpuStatus & 1) {
+		_register.gpuInterupt |= 0b1000;
+		_memory._getInterrupt |= 2;
+	}
 	// Which line of tiles to use in the map
 	addr += (((_register.line + _register.getDisplay().y) & 255)/ 8) * 32;
 	lineoffs = _register.getDisplay().x / 8;
@@ -164,7 +197,7 @@ void gfx::Screen::renderLineSprite()
 	int bit;
 	int tileAdrresse;
 
-	for (int i = 0; i < 40; i++){
+	for (int i = 0; i < 40 && _register.line < 144; i++){
 		cord.y = _memory._wram[0xE00 + i * 4];
 		cord.x = _memory._wram[0xE00 + i * 4 + 1];
 		tileNumber = _memory._wram[0xE00 + i * 4 + 2];
@@ -215,81 +248,3 @@ sf::Color gfx::Screen::getColorFromAddress(int address, unsigned char bit, unsig
 		return sf::Color(96, 96, 96);
 	return sf::Color(0, 0, 0);
 }
-
-void gfx::Screen::crossKeysEvent()
-{
-	while (_window->pollEvent(_event)) {
-	}
-}
-
-void gfx::Screen::updateKeyPressed()
-{
-	while (_window->pollEvent(_event)) {
-		if ((_memory._key & 0b00010000) >> 4) {
-			if (_event.type == sf::Event::KeyPressed) {
-				switch (_event.key.code) {
-					case sf::Keyboard::Key::S :
-						_memory._key &= 0b00110111;
-						break;
-					case sf::Keyboard::Key::W :
-						_memory._key &= 0b00111011;
-						break;
-					case sf::Keyboard::Key::D :
-						_memory._key &= 0b00111101;
-						break;
-					case sf::Keyboard::Key::A :
-						_memory._key &= 0b00111110;
-						break;
-				}
-			} else if (_event.type == sf::Event::KeyReleased) {
-				switch (_event.key.code) {
-					case sf::Keyboard::Key::S :
-						_memory._key |= 0b00001000;
-						break;
-					case sf::Keyboard::Key::W :
-						_memory._key |= 0b00000100;
-						break;
-					case sf::Keyboard::Key::D :
-						_memory._key |= 0b00000010;
-						break;
-					case sf::Keyboard::Key::A :
-						_memory._key |= 0b00000001;
-						break;
-				}
-			}
-		} else {
-			if (_event.type == sf::Event::KeyPressed) {
-				switch (_event.key.code) {
-					case sf::Keyboard::Key::O :
-						_memory._key &= 0b00110111;
-						break;
-					case sf::Keyboard::Key::P :
-						_memory._key &= 0b00111011;
-						break;
-					case sf::Keyboard::Key::K :
-						_memory._key &= 0b00111101;
-						break;
-					case sf::Keyboard::Key::L :
-						_memory._key &= 0b00111110;
-						break;
-				}
-			} else if (_event.type == sf::Event::KeyReleased) {
-				switch (_event.key.code) {
-					case sf::Keyboard::Key::O :
-						_memory._key |= 0b00001000;
-						break;
-					case sf::Keyboard::Key::P :
-						_memory._key |= 0b00000100;
-						break;
-					case sf::Keyboard::Key::K :
-						_memory._key |= 0b00000010;
-						break;
-					case sf::Keyboard::Key::L :
-						_memory._key |= 0b00000001;
-						break;
-				}
-			}
-		}
-	}
-}
-

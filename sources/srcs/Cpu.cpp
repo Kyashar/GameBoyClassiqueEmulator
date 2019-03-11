@@ -31,13 +31,20 @@ bool emulator::Cpu::gotSomethingToRead() const
 
 void emulator::Cpu::readInstruction()
 {
+	std::string c;
+	static bool print = false;
 	uint8_t cData = 0;
 	uint16_t sData = 0;
 
 	auto tmp = _register.pc;
 	auto instruction = managedInstruction[_memory[_register.pc]];
 	auto key = _memory._key;
+	uint8_t ifired;
 
+	if (_register.pc == 0x2391)
+		print = true;
+	if (_register.pc == 0x3ef)
+		print = false;
 	_register.m = 0;
 	_register.t = 0;
 	if (instruction._length == 2) {
@@ -45,20 +52,30 @@ void emulator::Cpu::readInstruction()
 		sData = cData;
 	} else if (instruction._length == 3)
 		sData = _memory.getShort(_register.pc + 1);
-
+	if (print) {
+		std::cout << "Pc: "  << _register.pc << " " << instruction._name;
+		if (instruction._length > 1)
+			 std::cout << "\nnData: " << sData << std::endl;
+		else
+			std::cout << std::endl;
+//		std::getline(std::cin, c);
+	}
 	(*this.*instruction._instruction)(sData);
 	_register.m += instruction._timer;
 	_register.t = _register.m * 4;
 
 	if (tmp == _register.pc)
 		_register.pc += instruction._length;
-	if (key != _memory._key) {
-		_memory._key |= 0b00001111;
+
+	ifired = _memory._interrupt & _memory._getInterrupt;
+	if (_register.iem  && ifired) {
+		if (ifired & 0x01) {
+			_memory._interrupt &= (255 - 0x01);
+			this->Rst_40H(sData);
+		}
 	}
+//	std::cout << _register.pc << std::endl;
 	_gpu.put(_register.t);
-	if ((_memory._key & 0b00110000) >> 4) {
-		_gpu.updateKeyPressed();
-	}
 }
 
 std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos &infos)
@@ -69,7 +86,7 @@ std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos
 
 std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction = {
 	{"NOP", 1, &Cpu::Nop, 1}, /* 0x00 */
-	{"LD BC, ction Findd16", 3, &Cpu::Ld_BC, 3},
+	{"LD BC, d16", 3, &Cpu::Ld_BC, 3},
 	{"LD (BC), A", 1, &Cpu::Ld_BC_A, 2},
 	{"INC BC", 1, &Cpu::Inc_BC, 2},
 	{"INC B", 1, &Cpu::Inc_B, 1},
@@ -278,7 +295,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"JP a16", 3, &Cpu::Jp, 4},
 	{"CALL NZ, a16", 3, &Cpu::Call_Nz, 6}, // 3
 	{"PUSH BC", 1, &Cpu::Push_Bc, 4},
-	{"ADD  A,d8", 2, &Cpu::Add_A, 2},
+	{"ADD  A, d8", 2, &Cpu::Add_A, 2},
 	{"RST 00H", 1, &Cpu::Rst_00H, 4},
 	{"RET Z", 1, &Cpu::Ret_Z, 5}, // 2
 	{"RET", 1, &Cpu::Ret, 4},
@@ -295,7 +312,7 @@ std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction =
 	{"NOT IMPLEMENTED", 1, &Cpu::default_operator, 1},
 	{"CALL NC, a16", 3, &Cpu::Call_Nc, 6}, // 3
 	{"PUSH DE", 1, &Cpu::Push_De, 4},
-	{"SUB  d8", 1, &Cpu::Sub, 2},
+	{"SUB d8", 2, &Cpu::Sub, 2},
 	{"RST 10H", 1, &Cpu::Rst_10H, 4},
 	{"RET C", 1, &Cpu::Ret_C, 5}, // 2
 	{"RETI", 1, &Cpu::Reti, 4}, // 3

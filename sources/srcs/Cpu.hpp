@@ -86,18 +86,24 @@ namespace emulator
 		}
 
 
-		void Rst_00H(uint16_t) {} /* call reset vector oO  function rsv() */
-		void Rst_08H(uint16_t) {} /* call reset vector oO  function rsv() */
-		void Rst_10H(uint16_t) {} /* call reset vector oO  function rsv() */
-		void Rst_18H(uint16_t) {} /* call reset vector oO  function rsv() */
-		void Rst_20H(uint16_t) {} /* call reset vector oO  function rsv() */
-		void Rst_28H(uint16_t) {} /* call reset vector oO  function rsv() */
-		void Rst_30H(uint16_t) {} /* call reset vector oO  function rsv() */
-		void Rst_38H(uint16_t) {} /* call reset vector oO  function rsv() */
+		void Rst_00H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x00;}
+		void Rst_08H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x08;}
+		void Rst_10H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x10;}
+		void Rst_18H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x18;}
+		void Rst_20H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x20;}
+		void Rst_28H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x28;}
+		void Rst_30H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x30;}
+		void Rst_38H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x38;}
+		void Rst_40H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x40;}
+		void Rst_48H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x48;}
+		void Rst_50H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x50;}
+		void Rst_58H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x58;}
+		void Rst_60H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x60;}
 
-		void Ei(uint16_t) {}         /* enable interupt */
-		void Reti(uint16_t) {}       /* enable sub routine */
-		void Di(uint16_t) {}         /* disable interrupt */
+
+		void Reti(uint16_t) {_register.iem = 1; _register.pc = this->revPopStack();}       /* enable sub routine */
+		void Ei(uint16_t) {_register.iem = 1;}         /* enable interupt */
+		void Di(uint16_t) {_register.iem = 0;}         /* disable interrupt */
 		void Prefix_Cb(uint16_t arg) {(*this.*prefixInstruction[arg]._instruction)();}  /* Call Prefix CB */
 
 		void Cpl(uint16_t) {_register.a = ~_register.a; _register.setFlagN(true); _register.setFlagH(true);}

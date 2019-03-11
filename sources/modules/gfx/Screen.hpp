@@ -38,7 +38,7 @@ namespace gfx {
 		ScreenLine operator[](size_t height) {
 			return ScreenLine(_pixels, height);
 		}
-		void setMemory(emulator::Memory &mem){_memory = mem;}
+		void setMemory(emulator::Memory &mem){_memory = mem; _register = mem._registerGpu;}
 		void initWindow();
 		void put(size_t timer);
 		void updateKeyPressed();
@@ -67,6 +67,7 @@ namespace gfx {
 		size_t _vBlank;
 		size_t _clock;
 		char _mode;
+		uint8_t tmp;
 	};
 }
 

@@ -11,6 +11,7 @@
 #include <iostream>
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <vector>
+#include <bitset>
 #include <array>
 
 namespace emulator
@@ -52,8 +53,10 @@ namespace emulator
 				zero = 0;
 				if (address == 0xFF40)
 					return gpuControl;
-				if (address == 0xFF41)
-					return gpuStatus;
+				if (address == 0xFF41) {
+					getInter = true;
+					return gpuInterupt;
+				}
 				if (address == 0xFF42)
 					return bgBeginDisplay.y;
 				if (address == 0xFF43)
@@ -109,8 +112,11 @@ namespace emulator
 				bgPalette = (bgPalette | (value << (index * 2)));
 			}
 
+			bool getInter;
+
 			unsigned char gpuControl;
 			unsigned char gpuStatus;
+			unsigned char gpuInterupt;
 			sf::Vector2<unsigned char> bgBeginDisplay;
 			sf::Vector2<unsigned char> windowBeginDisplay;
 			unsigned char line;
@@ -148,13 +154,15 @@ namespace emulator
 		std::array<uint8_t, 8192> _wram; 	// working ram
 		std::array<uint8_t, 160> _oam;
 		uint8_t _key; 				// key register 0xFF00
-
-		// memory mapped I/O 		  -> std::array<uint8_t, 128>
 		std::array<uint8_t, 128> _zram;
+
+		uint8_t _interrupt;
+		uint8_t _getInterrupt;
 	};
 }
 
 std::ostream &operator<<(std::ostream &os, emulator::Memory::GpuRegister &reg);
+void updateKeyPressed(uint8_t &key);
 
 
 #endif //EMULATOR_GAMEBOY_MEMORY_HPP

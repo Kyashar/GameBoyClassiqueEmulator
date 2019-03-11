@@ -65,6 +65,8 @@ namespace emulator
 		unsigned short sp;
 		unsigned short pc;
 
+		unsigned char iem;
+
 		void setFlagZ(bool b) {
 			f = (f & 0b01111111) + (b ? 0b10000000 : 0);
 		}
