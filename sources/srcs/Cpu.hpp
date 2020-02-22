@@ -68,40 +68,40 @@ namespace emulator
 			return ret;
 		}
 
-		void revPushStack(uint16_t arg) {
-			_register.sp--;
-			_memory[_register.sp] = (0b0000000011111111 & arg);
-			_register.sp--;
-			_memory[_register.sp] = (0b1111111100000000 & arg) >> 8;
-		}
-
-		uint16_t revPopStack() {
-			uint16_t ret{0};
-
-			ret = _memory[_register.sp] << 8;
-			_register.sp++;
-			ret += _memory[_register.sp];
-			_register.sp++;
-			return ret;
-		}
-
-
-		void Rst_00H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x00;}
-		void Rst_08H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x08;}
-		void Rst_10H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x10;}
-		void Rst_18H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x18;}
-		void Rst_20H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x20;}
-		void Rst_28H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x28;}
-		void Rst_30H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x30;}
-		void Rst_38H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x38;}
-		void Rst_40H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x40;}
-		void Rst_48H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x48;}
-		void Rst_50H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x50;}
-		void Rst_58H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x58;}
-		void Rst_60H(uint16_t) {_register.iem = 0; this->revPushStack(_register.pc); _register.pc = 0x60;}
+//		void revPushStack(uint16_t arg) {
+//			_register.sp--;
+//			_memory[_register.sp] = (0b0000000011111111 & arg);
+//			_register.sp--;
+//			_memory[_register.sp] = (0b1111111100000000 & arg) >> 8;
+//		}
+//
+//		uint16_t revPopStack() {
+//			uint16_t ret{0};
+//
+//			ret = _memory[_register.sp] << 8;
+//			_register.sp++;
+//			ret += _memory[_register.sp];
+//			_register.sp++;
+//			return ret;
+//		}
 
 
-		void Reti(uint16_t) {_register.iem = 1; _register.pc = this->revPopStack();}       /* enable sub routine */
+		void Rst_00H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x00;}
+		void Rst_08H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x08;}
+		void Rst_10H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x10;}
+		void Rst_18H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x18;}
+		void Rst_20H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x20;}
+		void Rst_28H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x28;}
+		void Rst_30H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x30;}
+		void Rst_38H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x38;}
+		void Rst_40H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x40;}
+		void Rst_48H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x48;}
+		void Rst_50H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x50;}
+		void Rst_58H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x58;}
+		void Rst_60H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x60;}
+
+
+		void Reti(uint16_t) {_register.iem = 1; _register.pc = this->popStack();}       /* enable sub routine */
 		void Ei(uint16_t) {_register.iem = 1;}         /* enable interupt */
 		void Di(uint16_t) {_register.iem = 0;}         /* disable interrupt */
 		void Prefix_Cb(uint16_t arg) {(*this.*prefixInstruction[arg]._instruction)();}  /* Call Prefix CB */
@@ -110,7 +110,7 @@ namespace emulator
 		void Scf(uint16_t) {_register.f = 0x10 + (_register.f & 0b10000000);}
 		void Ccf(uint16_t) {_register.f = (_register.f & 0x10 ? 0x00 : 0x10) + (_register.f & 0b10000000);}
 
-		void Nop(uint16_t) {}//std::cout << "DO nothing" << std::endl;}
+		void Nop(uint16_t) {std::cout << "DO nothing" << std::endl;}
 		void Stop(uint16_t arg) { std::cout << "STOP: " << arg << std::endl << "enter slow mode, what to do ?" << arg << std::endl;_memory.dumpMemory(0x8000, 0x9FFF);}
 		void Halt(uint16_t) {std::cout << "enter cpu lower mode" << std::endl;}
 
@@ -131,12 +131,12 @@ namespace emulator
 			_register.setFlagZ(_register.a == 0);
 			_register.setFlagH(false);
 		}
-		void Rra(uint16_t) { auto ci = _register.getFlagC() ? 0b10000000 : 0; auto co = (_register.a & 0b10000000) != 0; _register.a = (_register.a >> 1) + ci; _register.setFlagC(co);}
-		void Rla(uint16_t) {auto ci= _register.getFlagC(); auto co= (_register.a & 0b10000000) != 0; _register.a= (_register.a << 1) + ci; _register.setFlagC(co);}
+		void Rra(uint16_t) { auto ci = _register.getFlagC() ? 0b10000000 : 0    ; auto co = (_register.a & 0b10000000) != 0; _register.a = (_register.a >> 1) + ci; _register.setFlagC(co);}
+		void Rla(uint16_t) { auto ci= _register.getFlagC()                      ; auto co= (_register.a & 0b10000000) != 0; _register.a= (_register.a << 1) + ci; _register.setFlagC(co);}
 		void Rrca(uint16_t) {auto ci = _register.a & 0b00000001 ? 0b10000000 : 0; auto co = _register.a & 0b00000001; _register.a = (_register.a >> 1) + ci;_register.setFlagC(co);}
-		void Rlca(uint16_t) {auto ci = _register.a & 0b10000000 ? 1 : 0; _register.a = (_register.a << 1) + ci; _register.setFlagC(ci);}
+		void Rlca(uint16_t) {auto ci = _register.a & 0b10000000 ? 1 : 0         ; _register.a = (_register.a << 1) + ci; _register.setFlagC(ci);}
 
-		void Dec_De(uint16_t) {_register.de--; }
+		void Dec_De(uint16_t) {_register.de--;}
 		void Dec_BC(uint16_t) {_register.bc--;}
 		void Dec_Sp(uint16_t) {_register.sp--;}
 		void Dec_Hl(uint16_t) {_register.hl--;}
@@ -161,9 +161,9 @@ namespace emulator
 		void Inc_D(uint16_t) {_register.d++; _register.setFlagN(false); _register.setFlagZ(_register.d == 0);}
 		void Inc_E(uint16_t) {_register.e++; _register.setFlagN(false); _register.setFlagZ(_register.e == 0);}
 		void Inc_H(uint16_t) {_register.h++; _register.setFlagN(false); _register.setFlagZ(_register.h == 0);}
-		void Inc_L(uint16_t) {_register.hl++; _register.setFlagN(false); _register.setFlagZ(_register.l == 0);}
+		void Inc_L(uint16_t) {_register.l++; _register.setFlagN(false); _register.setFlagZ(_register.l == 0);}
 
-		void Add_SP(uint16_t arg){_register.sp += arg         ; _register.setFlagN(false); _register.setFlagZ(false);}
+		void Add_SP(uint16_t arg){_register.sp += (int8_t)arg ; _register.setFlagN(false); _register.setFlagZ(false);}
 		void Add_Hl_Hl(uint16_t) {_register.hl += _register.hl; _register.setFlagN(false);}
 		void Add_Hl_Sp(uint16_t) {_register.hl += _register.sp; _register.setFlagN(false);}
 		void Add_HL_BC(uint16_t) {_register.hl += _register.bc; _register.setFlagN(false);}
@@ -173,24 +173,24 @@ namespace emulator
 		void Add_A_A(uint16_t) {_register.a += _register.a; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 		void Add_A_B(uint16_t) {_register.a += _register.b; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 		void Add_A_C(uint16_t) {_register.a += _register.c; _register.setFlagZ(_register.b == 0); _register.setFlagN(false);}
-		void Add_A_D(uint16_t) {_register.a += _register.d; _register.setFlagZ(_register.c == 0); _register.setFlagN(false);}
-		void Add_A_E(uint16_t) {_register.a += _register.e; _register.setFlagZ(_register.d == 0); _register.setFlagN(false);}
-		void Add_A_H(uint16_t) {_register.a += _register.h; _register.setFlagZ(_register.e == 0); _register.setFlagN(false);}
+		void Add_A_D(uint16_t) {_register.a += _register.d; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Add_A_E(uint16_t) {_register.a += _register.e; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Add_A_H(uint16_t) {_register.a += _register.h; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 		void Add_A_L(uint16_t) {_register.a += _register.l; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 		void Add_A_Hlp(uint16_t) {_register.a += _memory[_register.hl]; _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 
-		void Adc_A_B(uint16_t) {_register.a += _register.b + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
-		void Adc_A_C(uint16_t) {_register.a += _register.c + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
-		void Adc_A_D(uint16_t) {_register.a += _register.d + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
-		void Adc_A_E(uint16_t) {_register.a += _register.e + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
-		void Adc_A_H(uint16_t) {_register.a += _register.h + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
-		void Adc_A_L(uint16_t) {_register.a += _register.l + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Adc_A_B(uint16_t) {_register.a   += _register.b + _register.getFlagC();           _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Adc_A_C(uint16_t) {_register.a   += _register.c + _register.getFlagC();           _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Adc_A_D(uint16_t) {_register.a   += _register.d + _register.getFlagC();           _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Adc_A_E(uint16_t) {_register.a   += _register.e + _register.getFlagC();           _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Adc_A_H(uint16_t) {_register.a   += _register.h + _register.getFlagC();           _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Adc_A_L(uint16_t) {_register.a   += _register.l + _register.getFlagC();           _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 		void Adc_A_Hlp(uint16_t) {_register.a += _memory[_register.hl] + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
-		void Adc_A_A(uint16_t) {_register.a += _register.a + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
-		void Adc(uint16_t arg) {_register.a += arg + _register.getFlagC(); _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Adc_A_A(uint16_t) {_register.a   += _register.a + _register.getFlagC();           _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
+		void Adc(uint16_t arg) {_register.a   += arg + _register.getFlagC();                   _register.setFlagZ(_register.a == 0); _register.setFlagN(false);}
 
 		void Sub(uint16_t arg) {_register.setFlagC(arg > _register.a)        ; _register.a -= arg        ; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
-		void Sub_A(uint16_t)   {_register.setFlagC(false); _register.a -= _register.a; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
+		void Sub_A(uint16_t)   {_register.setFlagC(false); _register.a = 0; _register.setFlagZ(true); _register.setFlagN(true);}
 		void Sub_B(uint16_t)   {_register.setFlagC(_register.b > _register.a); _register.a -= _register.b; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sub_C(uint16_t)   {_register.setFlagC(_register.c > _register.a); _register.a -= _register.c; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
 		void Sub_D(uint16_t)   {_register.setFlagC(_register.d > _register.a); _register.a -= _register.d; _register.setFlagZ(_register.a == 0); _register.setFlagN(true);}
@@ -250,11 +250,11 @@ namespace emulator
 		void Cp_L(uint16_t)   {_register.setFlagC(_register.l > _register.a); _register.setFlagN(true); _register.setFlagZ(_register.l == _register.a);}
 		void Cp_Hlp(uint16_t) {_register.setFlagC(_memory[_register.hl] > _register.a); _register.setFlagN(true); _register.setFlagZ(_memory[_register.hl] == _register.a);}
 
-		void Call(uint16_t arg)    {                            this->revPushStack(_register.pc + 3); _register.pc = arg;}
-		void Call_C(uint16_t arg)  {if (_register.getFlagC())  {this->revPushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
-		void Call_Z(uint16_t arg)  {if (_register.getFlagZ())  {this->revPushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
-		void Call_Nc(uint16_t arg) {if (!_register.getFlagC()) {this->revPushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
-		void Call_Nz(uint16_t arg) {if (!_register.getFlagZ()) {this->revPushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
+		void Call(uint16_t arg)    {                            this->pushStack(_register.pc + 3); _register.pc = arg;}
+		void Call_C(uint16_t arg)  {if (_register.getFlagC())  {this->pushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
+		void Call_Z(uint16_t arg)  {if (_register.getFlagZ())  {this->pushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
+		void Call_Nc(uint16_t arg) {if (!_register.getFlagC()) {this->pushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
+		void Call_Nz(uint16_t arg) {if (!_register.getFlagZ()) {this->pushStack(_register.pc + 3); _register.pc = arg;} else _register.m -= 3;}
 
 		void Push_De(uint16_t) {this->pushStack(_register.de);}
 		void Push_Hl(uint16_t) {this->pushStack(_register.hl);}
@@ -266,11 +266,11 @@ namespace emulator
 		void Pop_Af(uint16_t) {_register.af = this->popStack();}
 		void Pop_Bc(uint16_t) {_register.bc = this->popStack();}
 
-		void Ret(uint16_t)    {_register.pc = this->revPopStack();}
-		void Ret_Nz(uint16_t) {if (!_register.getFlagZ()) _register.pc = this->revPopStack(); else _register.m -= 3;}
-		void Ret_Nc(uint16_t) {if (!_register.getFlagC()) _register.pc = this->revPopStack(); else _register.m -= 3;}
-		void Ret_Z(uint16_t)  {if (_register.getFlagZ())  _register.pc = this->revPopStack(); else _register.m -= 3;}
-		void Ret_C(uint16_t)  {if (_register.getFlagC())  _register.pc = this->revPopStack(); else _register.m -= 3;}
+		void Ret(uint16_t)    {_register.pc = this->popStack();}
+		void Ret_Nz(uint16_t) {if (!_register.getFlagZ()) _register.pc = this->popStack(); else _register.m -= 3;}
+		void Ret_Nc(uint16_t) {if (!_register.getFlagC()) _register.pc = this->popStack(); else _register.m -= 3;}
+		void Ret_Z(uint16_t)  {if (_register.getFlagZ())  _register.pc = this->popStack(); else _register.m -= 3;}
+		void Ret_C(uint16_t)  {if (_register.getFlagC())  _register.pc = this->popStack(); else _register.m -= 3;}
 
 		void Jp(uint16_t arg)    {_register.pc = arg;}
 		void Jp_Hlp(uint16_t)    {_register.pc = _memory[_register.hl];}
@@ -291,7 +291,7 @@ namespace emulator
 		void Ld_DE(uint16_t arg) {_register.de = arg;}
 		void Ld_DE_A(uint16_t) {_memory[_register.de] = _register.a;}
 		void Ld_Hlpp_A(uint16_t) {_memory[_register.hl] = _register.a; _register.hl++;}
-		void Ld_HL_SP(uint16_t arg) {_register.hl = _register.sp + arg; _register.setFlagZ(false); _register.setFlagN(false);}
+		void Ld_HL_SP(uint16_t arg) {_register.hl = _register.sp + (int8_t)arg; _register.setFlagZ(false); _register.setFlagN(false);}
 		void Ld_Sp_Hl(uint16_t) {_register.sp = _register.hl;}
 		void Ld_Cp(uint16_t) {_memory[0xFF00 + _register.c] = _register.a;}
 
@@ -467,7 +467,8 @@ namespace emulator
 		void BIT_0_H() {_register.setFlagZ((_register.h & 0b1) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_0_L() {_register.setFlagZ((_register.l & 0b1) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_0_Hlp() {_register.setFlagZ((_memory[_register.hl] & 0b1) == 0); _register.setFlagN(false); _register.setFlagH(true);}
-		void BIT_0_A() {_register.setFlagZ((_register.a & 0b10) == 0); _register.setFlagN(false); _register.setFlagH(true);}
+		void BIT_0_A() {_register.setFlagZ((_register.a & 0b1) == 0); _register.setFlagN(false); _register.setFlagH(true);}
+
 		void BIT_1_B() {_register.setFlagZ((_register.b & 0b10) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_1_C() {_register.setFlagZ((_register.c & 0b10) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_1_D() {_register.setFlagZ((_register.d & 0b10) == 0); _register.setFlagN(false); _register.setFlagH(true);}
@@ -485,6 +486,7 @@ namespace emulator
 		void BIT_2_L() {_register.setFlagZ((_register.l & 0b100) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_2_Hlp() {_register.setFlagZ((_memory[_register.hl] & 0b100) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_2_A() {_register.setFlagZ((_register.a & 0b100) == 0); _register.setFlagN(false); _register.setFlagH(true);}
+
 		void BIT_3_B() {_register.setFlagZ((_register.b & 0b1000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_3_C() {_register.setFlagZ((_register.c & 0b1000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_3_D() {_register.setFlagZ((_register.d & 0b1000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
@@ -502,6 +504,7 @@ namespace emulator
 		void BIT_4_L() {_register.setFlagZ((_register.l & 0b10000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_4_Hlp() {_register.setFlagZ((_memory[_register.hl] & 0b10000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_4_A() {_register.setFlagZ((_register.a & 0b10000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
+
 		void BIT_5_B() {_register.setFlagZ((_register.b & 0b100000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_5_C() {_register.setFlagZ((_register.c & 0b100000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_5_D() {_register.setFlagZ((_register.d & 0b100000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
@@ -519,6 +522,7 @@ namespace emulator
 		void BIT_6_L() {_register.setFlagZ((_register.l & 0b1000000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_6_Hlp() {_register.setFlagZ((_memory[_register.hl] & 0b1000000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_6_A() {_register.setFlagZ((_register.a & 0b1000000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
+
 		void BIT_7_B() {_register.setFlagZ((_register.b & 0b10000000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_7_C() {_register.setFlagZ((_register.c & 0b10000000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
 		void BIT_7_D() {_register.setFlagZ((_register.d & 0b10000000) == 0); _register.setFlagN(false); _register.setFlagH(true);}
@@ -536,6 +540,7 @@ namespace emulator
 		void RES_0_L() {_register.l &= 0b11111110;}
 		void RES_0_Hlp() {_memory[_register.hl] &= 0b11111110;}
 		void RES_0_A() {_register.a &= 0b11111110;}
+
 		void RES_1_B() {_register.b &= 0b11111101;}
 		void RES_1_C() {_register.c &= 0b11111101;}
 		void RES_1_D() {_register.d &= 0b11111101;}
@@ -553,6 +558,7 @@ namespace emulator
 		void RES_2_L() {_register.l &= 0b11111011;};
 		void RES_2_Hlp() {_memory[_register.hl] &= 0b11111011;};
 		void RES_2_A() {_register.a &= 0b11111011;};
+
 		void RES_3_B() {_register.b &= 0b11110111;};
 		void RES_3_C() {_register.c &= 0b11110111;};
 		void RES_3_D() {_register.d &= 0b11110111;};
@@ -570,6 +576,7 @@ namespace emulator
 		void RES_4_L() {_register.l &= 0b11101111;};
 		void RES_4_Hlp() {_memory[_register.hl] &= 0b11101111;};
 		void RES_4_A() {_register.a &= 0b11101111;};
+
 		void RES_5_B() {_register.b &= 0b11011111;};
 		void RES_5_C() {_register.c &= 0b11011111;};
 		void RES_5_D() {_register.d &= 0b11011111;};
