@@ -41,8 +41,8 @@ void emulator::Cpu::readInstruction()
 	auto key = _memory._key;
 	uint8_t ifired;
 
-	if (_register.pc == 0x2391)
-		print = true;
+	if (_register.pc == 0x100)
+		print = false;
 	if (_register.pc == 0x3ef)
 		print = false;
 	_register.m = 0;
@@ -55,9 +55,10 @@ void emulator::Cpu::readInstruction()
 	if (print) {
 		std::cout << "Pc: "  << _register.pc << " " << instruction._name;
 		if (instruction._length > 1)
-			 std::cout << "\nnData: " << sData << std::endl;
+		    std::cout << "\nnData: " << sData << std::endl;
 		else
 			std::cout << std::endl;
+        std::cout  << "\na: "+ std::to_string(_register.a) << std::endl;
 //		std::getline(std::cin, c);
 	}
 	(*this.*instruction._instruction)(sData);

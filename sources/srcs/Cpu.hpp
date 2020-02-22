@@ -68,23 +68,6 @@ namespace emulator
 			return ret;
 		}
 
-//		void revPushStack(uint16_t arg) {
-//			_register.sp--;
-//			_memory[_register.sp] = (0b0000000011111111 & arg);
-//			_register.sp--;
-//			_memory[_register.sp] = (0b1111111100000000 & arg) >> 8;
-//		}
-//
-//		uint16_t revPopStack() {
-//			uint16_t ret{0};
-//
-//			ret = _memory[_register.sp] << 8;
-//			_register.sp++;
-//			ret += _memory[_register.sp];
-//			_register.sp++;
-//			return ret;
-//		}
-
 
 		void Rst_00H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x00;}
 		void Rst_08H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x08;}
@@ -110,7 +93,7 @@ namespace emulator
 		void Scf(uint16_t) {_register.f = 0x10 + (_register.f & 0b10000000);}
 		void Ccf(uint16_t) {_register.f = (_register.f & 0x10 ? 0x00 : 0x10) + (_register.f & 0b10000000);}
 
-		void Nop(uint16_t) {std::cout << "DO nothing" << std::endl;}
+		void Nop(uint16_t) {} // {std::cout << "DO nothing" << std::endl;}
 		void Stop(uint16_t arg) { std::cout << "STOP: " << arg << std::endl << "enter slow mode, what to do ?" << arg << std::endl;_memory.dumpMemory(0x8000, 0x9FFF);}
 		void Halt(uint16_t) {std::cout << "enter cpu lower mode" << std::endl;}
 
