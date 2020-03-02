@@ -17,6 +17,6 @@ std::ostream &operator<<(std::ostream &os, emulator::Register &reg)
 	os << "sp: " << std::setfill('0') << std::setw(4)  << (int)reg.sp << std::setfill('0') << std::setw(4)  <<  " pc: " << (int)reg.pc << std::endl;
 	os << "af: " << std::setfill('0') << std::setw(4)  << (int)reg.af << std::setfill('0') << std::setw(4)  <<  " bc: " << (int)reg.bc << std::endl;
 	os << "de: " << std::setfill('0') << std::setw(4)  << (int)reg.de << std::setfill('0') << std::setw(4)  <<  " hl: " << (int)reg.hl << std::endl;
-	os << "Flag: C " << reg.getFlagC() << " Z " << reg.getFlagZ() << " N " << reg.getFlagN() << std::endl;
+	os << "Flag: C " << reg.getFlagC() << " Z " << reg.getFlagZ() << " N " << reg.getFlagN() <<  " H " << reg.getFlagH() <<std::endl;
 	return os;
 }

@@ -104,7 +104,6 @@ uint8_t &emulator::Memory::operator[](int addr)
 		return zero;
 	else if (addr == 0xFF00) {        // IO register
 		updateKeyPressed(_key);
-//		std::cout << std::bitset<8>(_key) << std::endl;
 		return _key;
 	}
 	else if (addr < 0xFF10)
@@ -132,22 +131,22 @@ void updateKeyPressed(uint8_t &key)
 
 	if ((key & 0b00010000) >> 4) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-			key &= 0b00110111;
+			key &= 0b00010111;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-			key &= 0b00111011;
+			key &= 0b00011011;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-			key &= 0b00111101;
+			key &= 0b00011101;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-			key &= 0b00111110;
+			key &= 0b00011110;
 	} else if ((key & 0b00100000) >> 5) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::O))
-			key &= 0b00110111;
+			key &= 0b00100111;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::P))
-			key &= 0b00111011;
+			key &= 0b00101011;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
-			key &= 0b00111101;
+			key &= 0b00101101;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L))
-			key &= 0b00111110;
+			key &= 0b00101110;
 	}
 }
 

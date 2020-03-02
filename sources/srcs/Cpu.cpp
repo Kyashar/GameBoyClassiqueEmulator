@@ -31,6 +31,7 @@ bool emulator::Cpu::gotSomethingToRead() const
 
 void emulator::Cpu::readInstruction()
 {
+    static uint16_t count = 0;
 	std::string c;
 	static bool print = false;
 	uint8_t cData = 0;
@@ -41,26 +42,32 @@ void emulator::Cpu::readInstruction()
 	auto key = _memory._key;
 	uint8_t ifired;
 
-	if (_register.pc == 0x100)
-		print = false;
-	if (_register.pc == 0x3ef)
-		print = false;
-	_register.m = 0;
-	_register.t = 0;
+    if (_register.pc == 0xC005) {
+        print = true;
+    }
+
+    if (print) {
+        std::cout << "Pc: " << _register.pc;
+        if (_memory[_register.pc] == 0xCB)
+            std::cout << " " << prefixInstruction[_memory[_register.pc + 1]]._name;
+        else
+            std::cout << " " << instruction._name;
+        if (instruction._length == 2)
+            std::cout << "\ncData: " << (int)_memory[_register.pc + 1] << std::endl;
+        if (instruction._length == 3)
+            std::cout << "\nsData: " << (int)_memory.getShort(_register.pc + 1) << std::endl;
+        else
+            std::cout << std::endl;
+    }
+
+    _register.m = 0;
+    _register.t = 0;
+
 	if (instruction._length == 2) {
 		cData = _memory[_register.pc + 1];
 		sData = cData;
 	} else if (instruction._length == 3)
 		sData = _memory.getShort(_register.pc + 1);
-	if (print) {
-		std::cout << "Pc: "  << _register.pc << " " << instruction._name;
-		if (instruction._length > 1)
-		    std::cout << "\nnData: " << sData << std::endl;
-		else
-			std::cout << std::endl;
-        std::cout  << "\na: "+ std::to_string(_register.a) << std::endl;
-//		std::getline(std::cin, c);
-	}
 	(*this.*instruction._instruction)(sData);
 	_register.m += instruction._timer;
 	_register.t = _register.m * 4;
@@ -75,8 +82,16 @@ void emulator::Cpu::readInstruction()
 			this->Rst_40H(sData);
 		}
 	}
-//	std::cout << _register.pc << std::endl;
 	_gpu.put(_register.t);
+
+    if (print) {
+		std::cout << _register << std::endl;
+		if (_register.sp != 0) {
+			std::cout << _register.sp << ": " << getStack() << std::endl;
+			std::cout << "\t" << getStack(1) << std::endl;
+		}
+		std::getline(std::cin, c);
+	}
 }
 
 std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos &infos)
@@ -85,6 +100,11 @@ std::ostream &operator<<(std::ostream &os, const emulator::Cpu::instructionInfos
 	return os;
 }
 
+
+/*
+ * Flag managment
+ * POP, CP, Ld_HL_SP
+ */
 std::vector<emulator::Cpu::instructionInfos> emulator::Cpu::managedInstruction = {
 	{"NOP", 1, &Cpu::Nop, 1}, /* 0x00 */
 	{"LD BC, d16", 3, &Cpu::Ld_BC, 3},
