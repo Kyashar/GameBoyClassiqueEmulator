@@ -52,63 +52,63 @@ namespace emulator
 		bool _read;
 
 		void r(uint8_t &value) {
-            _register.f = (value & 0b00000001 ? 0b00010000 : 0b00000000); // set all to zero and C to the oc
-            value = (value >> 1);
+			_register.f = (value & 0b00000001 ? 0b00010000 : 0b00000000); // set all to zero and C to the oc
+			value = (value >> 1);
 		}
 
 		void l(uint8_t &value){
-            _register.f = (value & 0b10000000 ? 0b00010000 : 0b00000000);  // set all to zero and C to the oc
-            value = (value << 1);
+			_register.f = (value & 0b10000000 ? 0b00010000 : 0b00000000);  // set all to zero and C to the oc
+			value = (value << 1);
 		}
 
-        void rr(uint8_t &value) {
-            auto ci = _register.getFlagC() ? 0b10000000 : 0;
-		    r(value);
-            value += ci;
-        }
+		void rr(uint8_t &value) {
+			auto ci = _register.getFlagC() ? 0b10000000 : 0;
+			r(value);
+			value += ci;
+		}
 
-        void rl(uint8_t &value) {
-		    auto tmp =  _register.getFlagC();
-		    l(value);
-		    value +=  tmp;
-        }
+		void rl(uint8_t &value) {
+			auto tmp =  _register.getFlagC();
+			l(value);
+			value +=  tmp;
+		}
 
-        void rrc(uint8_t &value) {
-            auto co = (value & 0b00000001) << 7;
-            r(value);
-            value += co << 7;
-        }
+		void rrc(uint8_t &value) {
+			auto co = (value & 0b00000001) << 7;
+			r(value);
+			value += co << 7;
+		}
 
-        void rlc(uint8_t &value) {
-            auto co = (value & 0b10000000) >> 7 ;
-            l(value);
-            value += co;
-        }
+		void rlc(uint8_t &value) {
+			auto co = (value & 0b10000000) >> 7 ;
+			l(value);
+			value += co;
+		}
 
 		void pushStack(uint16_t arg) {
 			_register.sp--;
-			_memory[_register.sp] = (0b0000000011111111 & arg);
-			_register.sp--;
 			_memory[_register.sp] = (0b1111111100000000 & arg) >> 8;
+			_register.sp--;
+			_memory[_register.sp] = (0b0000000011111111 & arg);
 		}
 
 		uint16_t popStack() {
 			uint16_t ret{0};
 
-			ret = _memory[_register.sp] << 8;
+			ret = _memory[_register.sp];
 			_register.sp++;
-			ret += _memory[_register.sp];
+			ret += _memory[_register.sp] << 8;
 			_register.sp++;
 			return ret;
 		}
 
-        uint16_t getStack(uint8_t value=0) {
-            uint16_t ret{0};
+		uint16_t getStack(uint8_t value=0) {
+			uint16_t ret{0};
 
-            ret = _memory[_register.sp + value * 2] << 8;
-            ret += _memory[_register.sp + value * 2 + 1];
-            return ret;
-        }
+			ret = _memory[_register.sp + value * 2];
+			ret += _memory[_register.sp + value * 2 + 1]  << 8;
+			return ret;
+		}
 
 
 		void Rst_00H(uint16_t) {_register.iem = 0; this->pushStack(_register.pc); _register.pc = 0x00;}
@@ -133,14 +133,14 @@ namespace emulator
 
 		void Cpl(uint16_t) {_register.a = ~_register.a; _register.setFlagN(true); _register.setFlagH(true);}
 		void Scf(uint16_t) {_register.setFlagN(false); _register.setFlagH(false); _register.setFlagC(true);}
-        void Ccf(uint16_t) {_register.setFlagN(false); _register.setFlagH(false); _register.setFlagC(!_register.getFlagC());}
+		void Ccf(uint16_t) {_register.setFlagN(false); _register.setFlagH(false); _register.setFlagC(!_register.getFlagC());}
 
 		void Nop(uint16_t) {} // {std::cout << "DO nothing" << std::endl;}
 		void Stop(uint16_t arg) { std::cout << "STOP: " << arg << std::endl << "enter slow mode, what to do ?" << arg << std::endl;_memory.dumpMemory(0x8000, 0x9FFF);}
 		void Halt(uint16_t) {std::cout << "enter cpu lower mode" << std::endl;}
 
 		void Daa(uint16_t) {
-		    uint8_t value = 0;
+			uint8_t value = 0;
 
 			if (!_register.getFlagN()) {  // after an addition, adjust if (half-)carry occurred or if result is out of bounds
 				if (_register.getFlagC() || value > 0x99) {
@@ -160,7 +160,7 @@ namespace emulator
 			_register.a = value;
 		}
 		void Rra(uint16_t) {rr(_register.a);}
-        void Rrca(uint16_t) {rrc(_register.a);}
+		void Rrca(uint16_t) {rrc(_register.a);}
 
 		void Rla(uint16_t) {rl(_register.a);}
 		void Rlca(uint16_t) {rlc(_register.a);}
@@ -170,15 +170,15 @@ namespace emulator
 		void Dec_Sp(uint16_t) {_register.sp--;}
 		void Dec_Hl(uint16_t) {_register.hl--;}
 
-        void Dec_reg(uint8_t &reg) {
-            uint8_t res = reg - 1;
+		void Dec_reg(uint8_t &reg) {
+			uint8_t res = reg - 1;
 
-            _register.setFlagN(true);
-            _register.setFlagZ(res == 0);
-            _register.setFlagH((reg & 0xF) < (res & 0xF));
+			_register.setFlagN(true);
+			_register.setFlagZ(res == 0);
+			_register.setFlagH((reg & 0xF) < (res & 0xF));
 
-            reg = res;
-        }
+			reg = res;
+		}
 		void Dec_Hlp(uint16_t) {Dec_reg(_memory[_register.hl]);}
 		void Dec_A(uint16_t) {Dec_reg(_register.a);}
 		void Dec_B(uint16_t) {Dec_reg(_register.b);}
@@ -193,54 +193,61 @@ namespace emulator
 		void Inc_DE(uint16_t) {_register.de++;}
 		void Inc_Sp(uint16_t) {_register.sp++;}
 
-		void Inc_Hlp(uint16_t) {_register.setFlagH((_memory[_register.hl] & 0xF) > ((_memory[_register.hl] + 1) & 0xF));_memory[_register.hl]++; _register.setFlagN(false); _register.setFlagZ(_memory[_register.hl] == 0);}
-		void Inc_A(uint16_t) {_register.setFlagH((_register.a & 0xF) > ((_register.a + 1)& 0xF));           _register.a++; _register.setFlagN(false); _register.setFlagZ(_register.a == 0);}
-		void Inc_B(uint16_t) {_register.setFlagH((_register.b & 0xF) > ((_register.b + 1)& 0xF));           _register.b++; _register.setFlagN(false); _register.setFlagZ(_register.b == 0);}
-		void Inc_C(uint16_t) {_register.setFlagH((_register.c & 0xF) > ((_register.c + 1)& 0xF));           _register.c++; _register.setFlagN(false); _register.setFlagZ(_register.c == 0);}
-		void Inc_D(uint16_t) {_register.setFlagH((_register.d & 0xF) > ((_register.d + 1)& 0xF));           _register.d++; _register.setFlagN(false); _register.setFlagZ(_register.d == 0);}
-		void Inc_E(uint16_t) {_register.setFlagH((_register.e & 0xF) > ((_register.e + 1)& 0xF));           _register.e++; _register.setFlagN(false); _register.setFlagZ(_register.e == 0);}
-		void Inc_H(uint16_t) {_register.setFlagH((_register.h & 0xF) > ((_register.h + 1)& 0xF));           _register.h++; _register.setFlagN(false); _register.setFlagZ(_register.h == 0);}
-		void Inc_L(uint16_t) {_register.setFlagH((_register.l & 0xF) > ((_register.l + 1)& 0xF));           _register.l++; _register.setFlagN(false); _register.setFlagZ(_register.l == 0);}
+		void Inc_reg(uint8_t &reg) {
+			uint8_t res = reg + 1;
+
+			_register.setFlagN(false);
+			_register.setFlagZ(res == 0);
+			_register.setFlagH((uint8_t(reg) & 0xF) + (1 & 0xF) > 0xF);
+
+			reg = res;
+		}
+		void Inc_Hlp(uint16_t) {_register.setFlagH((_memory[_register.hl] & 0xF) + (1 & 0xF) > 0xF);_memory[_register.hl]++; _register.setFlagN(false); _register.setFlagZ(_memory[_register.hl] == 0);}
+		void Inc_A(uint16_t)   {Inc_reg(_register.a);}
+		void Inc_B(uint16_t)   {Inc_reg(_register.b);}
+		void Inc_C(uint16_t)   {Inc_reg(_register.c);}
+		void Inc_D(uint16_t)   {Inc_reg(_register.d);}
+		void Inc_E(uint16_t)   {Inc_reg(_register.e);}
+		void Inc_H(uint16_t)   {Inc_reg(_register.h);}
+		void Inc_L(uint16_t)   {Inc_reg(_register.l);}
 
 		void Add_SP(uint16_t arg){
-		    _register.setFlagH((uint8_t(_register.sp) & 0xF) + (arg & 0xF) > 0xF);
-		    _register.setFlagC((_register.sp & 0xFF) + int(arg) > 0xFF);
-		    _register.sp += (int8_t)arg ;
-		    _register.setFlagN(false);
-		    _register.setFlagZ(false);
+			_register.setFlagH((uint8_t(_register.sp) & 0xF) + (arg & 0xF) > 0xF);
+			_register.setFlagC((_register.sp & 0xFF) + int(arg) > 0xFF);
+			_register.sp += (int8_t)arg ;
+			_register.setFlagN(false);
+			_register.setFlagZ(false);
 		}
 
-        void Add_hl_ref(uint16_t to_add) {
-            auto res = _register.hl + to_add;
+		void Add_hl_ref(uint16_t to_add) {
+			auto res = _register.hl + to_add;
 
-            _register.f = 0;
-            _register.setFlagN(false);
-            _register.setFlagH((_register.hl & 0xFFF) + (to_add & 0xFFF) > 0xFFF);
-            _register.setFlagC(to_add > 0 && _register.hl > res);
+			_register.setFlagN(false);
+			_register.setFlagH((_register.hl & 0xFFF) + (to_add & 0xFFF) > 0xFFF);
+			_register.setFlagC(to_add > 0 && _register.hl > res);
 
-            _register.hl = res;
-        }
+			_register.hl = res;
+		}
 		void Add_Hl_Hl(uint16_t) {Add_hl_ref(_register.hl);}
 		void Add_Hl_Sp(uint16_t) {Add_hl_ref(_register.sp);}
 		void Add_HL_BC(uint16_t) {Add_hl_ref(_register.bc);}
 		void Add_Hl_De(uint16_t) {Add_hl_ref(_register.de);}
 
-        void Add_ref_ref(uint8_t &value, uint16_t to_add, bool carry) {
-            uint8_t res = value + to_add;
-            carry = carry && _register.getFlagC();
+		void Add_ref_ref(uint8_t &value, uint16_t to_add, bool carry) {
+			uint8_t res = value + to_add;
+			carry = carry && _register.getFlagC();
 
-            _register.f = 0;
-            _register.setFlagH(((int(value) & 0xF) + (to_add & 0xF)) > 0xF);
-            _register.setFlagC(to_add > 0 && value >= res);
-            if (carry) {
-                _register.setFlagH((res & 0xF) == 0xF);
-                _register.setFlagC(res == 0xFF);
-                res++;
-            }
-            value = res;
-            _register.setFlagZ(res == 0);
-            _register.setFlagN(false);
-        }
+			_register.setFlagH(((int(value) & 0xF) + (to_add & 0xF)) > 0xF);
+			_register.setFlagC(to_add > 0 && value > res);
+			if (carry) {
+				_register.setFlagH((res & 0xF) == 0xF);
+				_register.setFlagC(res == 0xFF);
+				res++;
+			}
+			value = res;
+			_register.setFlagZ(res == 0);
+			_register.setFlagN(false);
+		}
 		void Add_A(uint16_t arg) {Add_ref_ref(_register.a, arg, false);}
 		void Add_A_A(uint16_t)   {Add_ref_ref(_register.a, _register.a, false);}
 		void Add_A_B(uint16_t)   {Add_ref_ref(_register.a, _register.b, false);}
@@ -262,23 +269,23 @@ namespace emulator
 		void Adc(uint16_t arg)   { Add_ref_ref(_register.a, arg, true);}
 
 
-        void Sub_ref_ref(uint8_t &value, uint16_t to_sub, bool carry) {
-            uint8_t res = value - to_sub;
-            carry  = carry && _register.getFlagC();
+		void Sub_ref_ref(uint8_t &value, uint16_t to_sub, bool carry) {
+			uint8_t res = value - to_sub;
+			carry  = carry && _register.getFlagC();
 
-            _register.setFlagH((value & 0xF) < (to_sub & 0xF));
-            _register.setFlagC(to_sub > value);
+			_register.setFlagH((value & 0xF) < (to_sub & 0xF));
+			_register.setFlagC(to_sub > value);
 
-            if  (carry) {
-                _register.setFlagH((res & 0xF) == 0);
-                _register.setFlagC(res == 0);
-                res--;
-            }
+			if  (carry) {
+				_register.setFlagH((res & 0xF) == 0);
+				_register.setFlagC(res == 0);
+				res--;
+			}
 
-            _register.setFlagZ(res == 0);
-            _register.setFlagN(true);
-            value = res;
-        }
+			_register.setFlagZ(res == 0);
+			_register.setFlagN(true);
+			value = res;
+		}
 		void Sub(uint16_t arg) {Sub_ref_ref(_register.a, arg, false);                           }
 		void Sub_A(uint16_t)   {Sub_ref_ref(_register.a, _register.a , false);                  }
 		void Sub_B(uint16_t)   {Sub_ref_ref(_register.a, _register.b , false);                  }
@@ -330,12 +337,12 @@ namespace emulator
 		void Or_L(uint16_t) {_register.a |= _register.l; _register.f = 0; _register.setFlagZ(_register.a == 0);}
 		void Or_Hlp(uint16_t) {_register.a |= _memory[_register.hl]; _register.f = 0; _register.setFlagZ(_register.a == 0);}
 
-        void cp_ref(uint16_t value) {
-            _register.setFlagN(true);
-            _register.setFlagZ(_register.a == value);
-            _register.setFlagC(_register.a < value);
-            _register.setFlagH((_register.a & 0xF) < (value & 0xF));
-        }
+		void cp_ref(uint16_t value) {
+			_register.setFlagN(true);
+			_register.setFlagZ(_register.a == value);
+			_register.setFlagC(_register.a < value);
+			_register.setFlagH((_register.a & 0xF) < (value & 0xF));
+		}
 		void Cp(uint16_t arg) {cp_ref(arg); }
 		void Cp_A(uint16_t)   {cp_ref(_register.a);}
 		void Cp_B(uint16_t)   {cp_ref(_register.b);}
@@ -357,10 +364,10 @@ namespace emulator
 		void Push_Bc(uint16_t) {this->pushStack(_register.bc);}
 		void Push_Af(uint16_t) {this->pushStack(_register.af);}
 
-		void Pop_De(uint16_t) {_register.de = this->popStack(); _register.f = 0;}
-		void Pop_Hl(uint16_t) {_register.hl = this->popStack(); _register.f = 0;}
+		void Pop_De(uint16_t) {_register.de = this->popStack();}
+		void Pop_Hl(uint16_t) {_register.hl = this->popStack();}
 		void Pop_Af(uint16_t) {_register.af = this->popStack(); _register.f &= 0xF0;}
-		void Pop_Bc(uint16_t) {_register.bc = this->popStack(); _register.f = 0;}
+		void Pop_Bc(uint16_t) {_register.bc = this->popStack();}
 
 		void Ret(uint16_t)    {_register.pc = this->popStack();}
 		void Ret_Nz(uint16_t) {if (!_register.getFlagZ()) _register.pc = this->popStack(); else _register.m -= 3;}
@@ -387,13 +394,14 @@ namespace emulator
 		void Ld_DE(uint16_t arg) {_register.de = arg;}
 		void Ld_DE_A(uint16_t) {_memory[_register.de] = _register.a;}
 		void Ld_Hlpp_A(uint16_t) {_memory[_register.hl] = _register.a; _register.hl++;}
-        void Ld_HL_SP(uint16_t arg) {
-            _register.setFlagH(uint8_t(_register.sp & 0xF) + (arg & 0xF) > 0xF);
-            _register.setFlagC(false);
-            _register.setFlagZ(false);
-            _register.setFlagN(false);
-            _register.hl = _register.sp + (int8_t)arg;
-        }
+
+		void Ld_HL_SP(uint16_t arg) {
+			_register.setFlagH(uint8_t(_register.sp & 0xF) + (arg & 0xF) > 0xF);
+			_register.setFlagC(false);
+			_register.setFlagZ(false);
+			_register.setFlagN(false);
+			_register.hl = _register.sp + (int8_t)arg;
+		}
 		void Ld_Sp_Hl(uint16_t) {_register.sp = _register.hl;}
 		void Ld_Cp(uint16_t) {_memory[0xFF00 + _register.c] = _register.a;}
 
@@ -420,7 +428,7 @@ namespace emulator
 		void Ld_A_De(uint16_t) { _register.a = _memory[_register.de];}
 		void Ld_A_Hln(uint16_t) {_register.a = _memory[_register.hl]; _register.hl--;}
 		void Ld_A_Hlpp(uint16_t) {_register.a = _memory[_register.hl]; _register.hl++;}
-		void Ld_A_Hlp(uint16_t) {_register.a = _memory[_register.hl];}
+		void Ld_A_Hlp(uint16_t) {std::cout << (int)_register.hl << " " <<  (int)_memory[_register.hl] << std::endl; _register.a = _memory[_register.hl];}
 
 		void Ld_B(uint16_t arg) {_register.b = arg;};
 		void Ld_B_B(uint16_t) {_register.b = _register.b;}

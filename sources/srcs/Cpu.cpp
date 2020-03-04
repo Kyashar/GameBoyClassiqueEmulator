@@ -42,7 +42,7 @@ void emulator::Cpu::readInstruction()
 	auto key = _memory._key;
 	uint8_t ifired;
 
-    if (_register.pc == 0xC005) {
+    if (_register.pc == 0x21b){
         print = true;
     }
 
@@ -86,11 +86,11 @@ void emulator::Cpu::readInstruction()
 
     if (print) {
 		std::cout << _register << std::endl;
-		if (_register.sp != 0) {
+		if (_register.sp != 0 && _register.sp != 0xfffe) {
 			std::cout << _register.sp << ": " << getStack() << std::endl;
 			std::cout << "\t" << getStack(1) << std::endl;
 		}
-		std::getline(std::cin, c);
+	    std::getline(std::cin, c);
 	}
 }
 

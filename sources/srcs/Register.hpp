@@ -79,6 +79,7 @@ namespace emulator
 		void setFlagC(bool b) {
 			f = (f & 0b11101111) + (b ? 0b00010000 : 0);
 		}
+
 		bool getFlagC() {
 			return (f & 0b00010000) != 0;
 		}
